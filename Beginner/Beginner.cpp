@@ -11,10 +11,10 @@ class Node
 public:
     int Data;
     Node* pNext;
-    Node():Node(0, nullptr)
+    Node() :Node(0, nullptr)
     { }
 
-    Node(int oData):Node(oData, nullptr)
+    Node(int oData) :Node(oData, nullptr)
     { }
 
     Node(int oData, Node* oNext)
@@ -59,7 +59,7 @@ void PrintLinkedListReverse(Node* pNode)
         return;
 
     PrintLinkedListReverse(pNode->pNext);
-    cout << pNode->Data << " "; 
+    cout << pNode->Data << " ";
 }
 
 /*
@@ -172,7 +172,7 @@ Node* Distinct(Node* pNode, const int xLastData)
         delete(pNodeTBD); pNodeTBD = nullptr;
         return Distinct(pNode, xLastData);
     }
-    
+
     pNode->pNext = Distinct(pNode->pNext, pNode->Data);
     return pNode;
 }
@@ -190,8 +190,8 @@ Node* Unique(Node* pNode)
 
 
 int main()
-{ 
-    vector<int> oInput{4, 1, 3, 4, 2, 5, 4, 4, 1, 1, 4, 6, 7 };
+{
+    vector<int> oInput{ 4, 1, 3, 4, 2, 5, 4, 4, 1, 1, 4, 6, 7 };
     sort(oInput.begin(), oInput.end());
     Node* pHead = CreateLinkedList(oInput, 0);
     PrintLinkedList(pHead);
