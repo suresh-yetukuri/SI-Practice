@@ -385,18 +385,85 @@ Node* ReverseBetween(Node* pNode, int m, int n)
     return pNode;
 }
 
+/*
+Reorder Linked List
+*/
+Node* Reorder(Node* pHead)
+{
+    if ((nullptr == pHead) || (nullptr == pHead->pNext))
+        return pHead;
+
+    Node* pMid = FindMid(pHead, true);
+    Node* pRight = pMid->pNext;
+    pMid->pNext = nullptr;
+    pRight = Reverse(pRight);
+    Node* pCurrent = pHead;
+    while (nullptr != pRight)
+    {
+        Node* pRightNext = pRight->pNext;
+        Node* pCurrentNext = pCurrent->pNext;
+        pCurrent->pNext = pRight;
+        pRight->pNext = pCurrentNext;
+        pCurrent = pCurrentNext;
+        pRight = pRightNext;
+    }
+
+    return pHead;
+}
+
+/*
+Remove Nth Node from end of linked list
+*/
+namespace Remove
+{
+    Node* Remove(Node* pNode, int& oPos, bool& IsDeleted)
+    {
+        if (nullptr == pNode)
+            return pNode;
+
+        pNode->pNext = Remove(pNode->pNext, oPos, IsDeleted);
+        if (!IsDeleted && (1 == oPos || (0 >= oPos)))
+        {
+            Node* pNodeTBD = pNode;
+            pNode = pNode->pNext;
+            delete(pNodeTBD); pNodeTBD = nullptr;
+            --oPos;
+            IsDeleted = true;
+            return pNode;
+        }
+
+        if (!IsDeleted)
+            --oPos;
+
+        return pNode;
+    }
+
+    Node* RemoveNthNode(Node* pHead, int xPos)
+    {
+        bool IsDeleted = false;
+        Node* pNewHead = Remove(pHead, xPos, IsDeleted);
+        if (!IsDeleted)
+        {
+            Node* pNodeTBD = pNewHead;
+            pNewHead = pNewHead->pNext;
+            delete(pNodeTBD); pNodeTBD = nullptr;
+        }
+
+        return pNewHead;
+    }
+}
 
 
 int main()
 {
-    vector<int> oLeft{ 3, 5, 2, 1, 4, 3, 9, 7, 8, 5, 6 };
+    vector<int> oLeft{ 1, 2 , 3 , 4, 5 };
     //vector<int> oRight{ 2, 4, 6, 8, 10 };
     // sort(oInput.begin(), oInput.end());
-    Node* pLeft = CreateLinkedList(oLeft, 0);
-    Node* pHead = MergeSort(pLeft);
-    PrintLinkedList(pHead);
+    Node* pLeft = CreateLinkedList(oLeft, 0); 
+    PrintLinkedList(pLeft);
     cout << endl;
-    pHead = ReverseBetween(pHead, 4, 9);
+    int x = 1;
+    Node* pHead = Remove::RemoveNthNode(pLeft, x);
     PrintLinkedList(pHead);
     cout << endl;
 
