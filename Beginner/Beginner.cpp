@@ -164,7 +164,7 @@ Node* Distinct(Node* pNode, const int xLastData)
 {
     if ((nullptr == pNode) || (nullptr == pNode->pNext))
     {
-        if (xLastData == pNode->Data)
+        if ((nullptr != pNode) && (xLastData == pNode->Data))
         {
             delete(pNode);
             pNode = nullptr;
@@ -414,7 +414,7 @@ Node* Reorder(Node* pHead)
 /*
 Remove Nth Node from end of linked list
 */
-namespace Remove
+namespace RemoveRecursive
 {
     Node* Remove(Node* pNode, int& oPos, bool& IsDeleted)
     {
@@ -453,6 +453,90 @@ namespace Remove
     }
 }
 
+/*
+Remove Nth Node from end of linked list
+*/
+namespace RemoveIterative
+{
+    Node* RemoveNthNode(Node* pHead, int xPos)
+    {
+        int nSize = GetLengthOfList(pHead);
+        Node* pNodeTBD = nullptr;
+        if ((nSize - xPos) <= 0)
+        {
+            pNodeTBD = pHead;
+            pHead = pHead->pNext;
+        }
+        else {
+            Node* pCurrent = pHead;
+            Node* pPrev = nullptr;
+            for (int iCounter = 1; iCounter < (nSize - xPos); ++iCounter) {
+                if (nullptr != pCurrent->pNext) {
+                    pPrev = pCurrent;
+                    pCurrent = pCurrent->pNext;
+                }
+                else
+                    break;
+            }
+            if (nullptr != pCurrent->pNext) {
+                pNodeTBD = pCurrent->pNext;
+                pCurrent->pNext = pNodeTBD->pNext;
+            }
+            else {
+                pNodeTBD = pCurrent;
+                if(nullptr != pPrev)
+                    pPrev->pNext = nullptr;
+            }
+        }
+        
+        delete(pNodeTBD);
+        pNodeTBD = nullptr;
+        return pHead;
+    }
+}
+
+/*
+InsertionSort
+*/
+namespace InsertionSort
+{
+    Node* Insert(Node* pNode, Node* xNode)
+    {
+        if (nullptr == pNode)
+            return xNode;
+
+        if (xNode->Data <= pNode->Data)
+        {
+            xNode->pNext = pNode;
+            return xNode;
+        }
+
+        pNode->pNext = Insert(pNode->pNext, xNode);
+        return pNode;
+    }
+
+    Node* InsertionSort(Node* pHead)
+    {
+
+        Node* pCurrent = pHead->pNext;
+        Node* pPrev = pHead;
+        while (nullptr != pCurrent)
+        {
+            Node* pNext = pCurrent->pNext;
+            pCurrent->pNext = nullptr;
+            pPrev->pNext = nullptr;
+            pHead = Insert(pHead, pCurrent);
+            if ((nullptr != pPrev->pNext) && (pCurrent == pPrev->pNext))
+                pPrev = pCurrent;
+
+            pCurrent = pNext;
+        }
+        
+        return pHead;
+    }
+}
+
+
 
 int main()
 {
@@ -462,8 +546,8 @@ int main()
     Node* pLeft = CreateLinkedList(oLeft, 0); 
     PrintLinkedList(pLeft);
     cout << endl;
-    int x = 1;
-    Node* pHead = Remove::RemoveNthNode(pLeft, x);
+    int x = -8;
+    Node* pHead = RemoveIterative::RemoveNthNode(pLeft, x);
     PrintLinkedList(pHead);
     cout << endl;
 
