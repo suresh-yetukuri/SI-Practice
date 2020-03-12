@@ -535,7 +535,96 @@ namespace InsertionSort
         return pHead;
     }
 }
+ 
+namespace Partitioning
+{ 
+    Node* Partition(Node* pCurrent, const int xData, Node* pRightHead)
+    {
+        if (nullptr == pCurrent)
+            return pCurrent;
 
+        if (xData <= pCurrent->Data)
+        {
+            Node* pNext = pCurrent->pNext;
+            pRightHead->pNext = pCurrent;
+            pCurrent->pNext = nullptr;
+            return Partition(pNext, xData, pRightHead->pNext);
+        }
+
+        pCurrent->pNext = Partition(pCurrent->pNext, xData, pRightHead);
+        return pCurrent;
+    }
+
+    Node* PartitionPreservingOrder(Node* pHead, int xData)
+    {
+        if (nullptr == pHead || nullptr == pHead->pNext)
+            return pHead;
+
+        Node* pGreaterHead = new Node(INT_MIN, nullptr);
+        pHead = Partition(pHead, xData, pGreaterHead);
+        Node* pNodeTBD = pGreaterHead;
+        pGreaterHead = pGreaterHead->pNext;
+        delete(pNodeTBD); pNodeTBD = nullptr;
+        if (nullptr != pHead)
+        {
+            Node* pCurrent = pHead;
+            while (nullptr != pCurrent->pNext)
+                pCurrent = pCurrent->pNext;
+
+            pCurrent->pNext = pGreaterHead;
+        }
+        else
+            pHead = pGreaterHead;
+       
+        return pHead;
+    }
+}
+
+namespace PartitioningEasy
+{
+    Node* Partition(Node* pCurrent, const int xData, Node* pLeftTail, Node* pRightHead)
+    {
+        if (nullptr == pCurrent) {
+            return pCurrent;
+        }
+
+        if (xData <= pCurrent->Data)
+        {
+            Node* pNext = pCurrent->pNext;
+            pRightHead->pNext = pCurrent;
+            pCurrent->pNext = nullptr;
+            return Partition(pNext, xData, pLeftTail, pRightHead->pNext);
+        }
+
+        pLeftTail->pNext = pCurrent;
+        pCurrent->pNext = Partition(pCurrent->pNext, xData, pLeftTail, pRightHead);
+        return pCurrent;
+    }
+
+    Node* PartitionPreservingOrder(Node* pHead, int xData)
+    {
+        if (nullptr == pHead || nullptr == pHead->pNext)
+            return pHead;
+
+        Node* pGreaterHead = new Node(INT_MIN, nullptr);
+        Node* pLesserTail = new Node(INT_MIN, nullptr);
+        pHead = Partition(pHead, xData, pLesserTail, pGreaterHead);
+
+        // Delete Dummy nodes
+        Node* pNodeTBD = pGreaterHead;
+        pGreaterHead = pGreaterHead->pNext;
+        delete(pNodeTBD); pNodeTBD = nullptr;
+        pNodeTBD = pLesserTail;
+        pLesserTail = pLesserTail->pNext;
+        delete(pNodeTBD); pNodeTBD = nullptr;
+        if (nullptr != pLesserTail)
+            pLesserTail->pNext = pGreaterHead;
+        else
+            pHead = pGreaterHead;
+             
+        return pHead;
+    }
+}
 
 
 int main()
@@ -546,8 +635,8 @@ int main()
     Node* pLeft = CreateLinkedList(oLeft, 0); 
     PrintLinkedList(pLeft);
     cout << endl;
-    int x = -8;
-    Node* pHead = RemoveIterative::RemoveNthNode(pLeft, x);
+    int x = 1;
+    Node* pHead = Partitioning::PartitionPreservingOrder(pLeft, x);
     PrintLinkedList(pHead);
     cout << endl;
 
