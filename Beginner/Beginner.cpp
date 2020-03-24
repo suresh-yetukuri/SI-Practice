@@ -626,18 +626,166 @@ namespace PartitioningEasy
     }
 }
 
+namespace Rotate
+{
+    Node* RotateIterative(Node* pHead, int kSize)
+    {
+        if (nullptr == pHead || nullptr == pHead->pNext)
+            return pHead;
+
+        int nSize = GetLengthOfList(pHead);
+        kSize = kSize % nSize;
+        if (0 == kSize)
+            return pHead;
+
+        int iCounter = 1;
+        Node* pCurrent = pHead;
+        while (iCounter < (nSize - kSize)) {
+            pCurrent = pCurrent->pNext;
+            ++iCounter;
+        }
+
+        Node* pNewHead = pCurrent->pNext;
+        pCurrent->pNext = nullptr;
+
+        pCurrent = pNewHead;
+        while (nullptr != pCurrent->pNext)
+            pCurrent = pCurrent->pNext;
+
+        pCurrent->pNext = pHead;
+        return pNewHead;
+    } 
+}
+
+namespace ReverseInGroup
+
+{
+    namespace Recursive
+    {
+        Node* ReverseIteratively(Node* pHead, Node** pNextHead, int kGroup)
+        {
+            if (nullptr == pHead || nullptr == pHead->pNext)
+                return pHead;
+
+            Node* pCurrent = pHead;
+            Node* pNext = nullptr;
+            Node* pPrev = nullptr;
+            int kCounter = 0;
+            while (nullptr != pCurrent && kCounter < kGroup)
+            {
+                ++kCounter;
+                pNext = pCurrent->pNext;
+                pCurrent->pNext = pPrev;
+                pPrev = pCurrent;
+                pCurrent = pNext;
+            }
+
+            *pNextHead = pCurrent;
+            return pPrev;
+        }
+
+        Node* ReverseInGroup(Node* pHead, int kGroup)
+        {
+            if (nullptr == pHead)
+                return pHead;
+
+            Node* pNextHead = nullptr;
+            Node* pNode = ReverseIteratively(pHead, &pNextHead, kGroup);
+            pHead->pNext = ReverseInGroup(pNextHead, kGroup);
+            return pNode;
+        }
+    }
+
+    namespace Iterative
+    {
+        Node* ReverseInGroup(Node* pHead, int kGroup)
+        {
+            if (nullptr == pHead)
+                return pHead;
+
+            Node* pMainHead = nullptr;
+            Node* pGroupTail = nullptr;
+            Node* pCurrent = pHead;
+            while (nullptr != pCurrent)
+            {
+                int kCounter = 0;
+                Node* pPrev = nullptr;
+                Node* pCurrentGroupTail = pCurrent;
+
+                while ((nullptr != pCurrent) && (kCounter < kGroup))
+                {
+                    Node* pNext = pCurrent->pNext;
+                    pCurrent->pNext = pPrev;
+                    pPrev = pCurrent;
+                    pCurrent = pNext;
+                    ++kCounter;
+                }
+
+                if (nullptr == pMainHead)
+                    pMainHead = pPrev;
+                else {
+                    if(nullptr != pGroupTail)
+                        pGroupTail->pNext = pPrev;
+                }  
+
+                pGroupTail = pCurrentGroupTail;
+            }
+             
+            return pMainHead;
+        }
+    }
+    
+}
+
+Node* ListCycle(Node* pHead)
+{
+    if (nullptr == pHead || nullptr == pHead->pNext)
+        return nullptr;
+
+    Node* pSlow = pHead;
+    Node* pFast = pHead;
+
+    while ((nullptr != pFast) && (nullptr != pFast->pNext))
+    {
+        pSlow = pSlow->pNext;
+        pFast = pFast->pNext->pNext;
+        if (pSlow == pFast)
+            break;
+    }
+
+    if (pSlow == pFast && (nullptr != pFast))
+    {
+        // Cycle is detected
+        pSlow = pHead;
+        while (pSlow != pFast)
+        {
+            pSlow = pSlow->pNext;
+            pFast = pFast->pNext;
+        }
+
+        return pSlow;
+    }
+
+    return nullptr;
+}
+
 
 int main()
 {
-    vector<int> oLeft{ 1, 2 , 3 , 4, 5 };
-    //vector<int> oRight{ 2, 4, 6, 8, 10 };
-    // sort(oInput.begin(), oInput.end());
+    vector<int> oLeft{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     Node* pLeft = CreateLinkedList(oLeft, 0); 
     PrintLinkedList(pLeft);
     cout << endl;
-    int x = 1;
-    Node* pHead = Partitioning::PartitionPreservingOrder(pLeft, x);
-    PrintLinkedList(pHead);
+    pLeft = ReverseInGroup::Iterative::ReverseInGroup(pLeft, 4);
+    PrintLinkedList(pLeft);
+    cout << endl;
+
+    int k = 90; 
+    Node* pCycle = ListCycle(pLeft);
+    pLeft = Rotate::RotateIterative(pLeft, k);
+    //int x = 1;
+    Node* pHead = nullptr;
+    PrintLinkedList(pLeft);
     cout << endl;
 
 

@@ -99,6 +99,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Basics", "Basics\Basics.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Beginner", "Beginner\Beginner.vcxproj", "{AA8585E2-74C6-47E1-85D4-D1541144CFF0}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LRU Mechanism", "LRU Mechanism\LRU Mechanism.vcxproj", "{6D1CFC9A-621D-422A-930D-A9B0C93299A6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -467,6 +469,14 @@ Global
 		{AA8585E2-74C6-47E1-85D4-D1541144CFF0}.Release|x64.Build.0 = Release|x64
 		{AA8585E2-74C6-47E1-85D4-D1541144CFF0}.Release|x86.ActiveCfg = Release|Win32
 		{AA8585E2-74C6-47E1-85D4-D1541144CFF0}.Release|x86.Build.0 = Release|Win32
+		{6D1CFC9A-621D-422A-930D-A9B0C93299A6}.Debug|x64.ActiveCfg = Debug|x64
+		{6D1CFC9A-621D-422A-930D-A9B0C93299A6}.Debug|x64.Build.0 = Debug|x64
+		{6D1CFC9A-621D-422A-930D-A9B0C93299A6}.Debug|x86.ActiveCfg = Debug|Win32
+		{6D1CFC9A-621D-422A-930D-A9B0C93299A6}.Debug|x86.Build.0 = Debug|Win32
+		{6D1CFC9A-621D-422A-930D-A9B0C93299A6}.Release|x64.ActiveCfg = Release|x64
+		{6D1CFC9A-621D-422A-930D-A9B0C93299A6}.Release|x64.Build.0 = Release|x64
+		{6D1CFC9A-621D-422A-930D-A9B0C93299A6}.Release|x86.ActiveCfg = Release|Win32
+		{6D1CFC9A-621D-422A-930D-A9B0C93299A6}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -475,6 +485,7 @@ Global
 		{94ADE40B-9CDA-438D-B7CF-17B1DF8F745E} = {05BAE4C6-BCB5-441D-AA03-103E7EDCB200}
 		{CDDC1C65-CE2C-462E-AF24-0E8653044B11} = {DB8C5C9F-CA9F-4CC3-95BC-9558A1C6C6B1}
 		{AA8585E2-74C6-47E1-85D4-D1541144CFF0} = {CDDC1C65-CE2C-462E-AF24-0E8653044B11}
+		{6D1CFC9A-621D-422A-930D-A9B0C93299A6} = {CDDC1C65-CE2C-462E-AF24-0E8653044B11}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1AC0239E-6768-442B-A209-89D7A40DE8C7}
