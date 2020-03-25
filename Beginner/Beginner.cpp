@@ -769,13 +769,84 @@ Node* ListCycle(Node* pHead)
     return nullptr;
 }
 
+namespace AddList
+{
+    Node* DeleteTrailingZeroes(Node* pNode)
+    {
+        if (nullptr == pNode)
+            return nullptr;
+
+        pNode->pNext = DeleteTrailingZeroes(pNode->pNext);
+        if ((0 == pNode->Data) && (nullptr == pNode->pNext))
+        {
+            Node* pNodeTBD = pNode;
+            delete(pNodeTBD); pNodeTBD = nullptr;
+            return nullptr;
+        }
+
+        return pNode;
+    }
+
+    Node* AddList(Node* pLeft, Node* pRight)
+    {
+        Node* pResult = nullptr;
+        Node* pCurrent = pResult = new Node(-1);
+        Node* pPrev = nullptr;
+        Node* pLeftCur = pLeft;
+        Node* pRightCur = pRight;
+        int oCarry = 0;
+
+        while ((nullptr != pLeftCur) && (nullptr != pRightCur))
+        {
+            int oSum = (pLeftCur->Data) + (pRightCur->Data) + oCarry;
+            oCarry = oSum / 10;
+            pCurrent->pNext = new Node(oSum % 10);
+            pCurrent = pCurrent->pNext;
+            pLeftCur = pLeftCur->pNext;
+            pRightCur = pRightCur->pNext;
+        }
+
+        Node* pRestList = (pLeftCur != nullptr) ? pLeftCur : pRightCur;
+        while (nullptr != pRestList)
+        {
+            int oSum = (pRestList->Data) + oCarry;
+            oCarry = oSum / 10;
+            pCurrent->pNext = new Node(oSum % 10);
+            pCurrent = pCurrent->pNext;
+            pRestList = pRestList->pNext;
+        }
+
+        if (oCarry > 0) {
+            pCurrent->pNext = new Node(oCarry);
+            pCurrent = pCurrent->pNext;
+        }
+
+
+
+        // Delete Dummy node
+        Node* pNodeTBD = pResult;
+        pResult = pResult->pNext;
+        delete(pNodeTBD); pNodeTBD = nullptr;
+
+        // Delete Trailing Zeroes
+        pResult = DeleteTrailingZeroes(pResult);
+        return pResult;
+    }
+
+}
 
 int main()
 {
-    vector<int> oLeft{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-    Node* pLeft = CreateLinkedList(oLeft, 0); 
+    vector<int> oLeft{ 9, 9, 1};
+    vector<int> oRight{ 1};
+    Node* pLeft = CreateLinkedList(oLeft, 0);
+    Node* pRight = CreateLinkedList(oRight, 0);
     PrintLinkedList(pLeft);
     cout << endl;
+    PrintLinkedList(pRight);
+    Node* pResult = AddList::AddList(pLeft, pRight);
+    cout << endl;
+    PrintLinkedList(pResult);
     pLeft = ReverseInGroup::Iterative::ReverseInGroup(pLeft, 4);
     PrintLinkedList(pLeft);
     cout << endl;
