@@ -6,45 +6,75 @@
 #include <algorithm>
 using namespace std;
 
-int KillingDragon(vector<int>& oDungeon, vector<int>& oDrinks)
+/*
+N^2, N
+*/
+namespace BruteForce
 {
-    int nSize = static_cast<int>(oDungeon.size());
-    int oDungeonCap = oDungeon[0];
-    int oDrinkCap = oDrinks[0];
-    vector<int> oPrefixDiff(nSize, (oDrinks[0] - oDungeon[0]));
-
-    for (int iCounter = 1; iCounter < nSize; ++iCounter)
+    int KillingDragon(vector<int>& oDungeon, vector<int>& oDrinks)
     {
-        oDungeonCap += oDungeon[iCounter];
-        oDrinkCap += oDrinks[iCounter];
-        oPrefixDiff[iCounter] = oPrefixDiff[iCounter - 1] + (oDrinks[iCounter] - oDungeon[iCounter]);
-    }
-
-    if (oDungeonCap > oDrinkCap)
-        return -1;
-
-    bool IsNegativeExist = false;
-    int iCounter = 0;
-    for (iCounter = 0; iCounter < nSize; ++iCounter)
-    {
-        if (oPrefixDiff[iCounter] < 0)
+        int nSize = static_cast<int>(oDungeon.size());
+        for (int iCounter = 0; iCounter < nSize; ++iCounter)
         {
-            IsNegativeExist = true;
-            break;
+            int oDungeonCap = oDungeon[iCounter];
+            int oDrinkCap = oDrinks[iCounter];
+            vector<int> oPrefixDiff(nSize, (oDrinks[iCounter] - oDungeon[iCounter]));
+            int oNegativeCount = oPrefixDiff[iCounter] < 0 ? 1 : 0;
+            if (oNegativeCount == 0) {
+                for (int jCounter = ((iCounter + 1) % nSize); ((jCounter < nSize) && (jCounter != iCounter)); jCounter = ((jCounter + 1) % nSize)) {
+                    oDungeonCap += oDungeon[jCounter];
+                    oDrinkCap += oDrinks[jCounter];
+                    oPrefixDiff[jCounter] = oPrefixDiff[(jCounter + nSize - 1) % nSize] + (oDrinks[jCounter] - oDungeon[jCounter]);
+                    if (oPrefixDiff[jCounter] < 0)
+                        ++oNegativeCount;
+                }
+                if (oDungeonCap > oDrinkCap)
+                    return -1;
+
+                if (oNegativeCount == 0)
+                    return iCounter + 1;
+            }
+            else {
+                continue;
+            }
         }
+
+        return -1;
     }
+}
 
-    if (IsNegativeExist)
-        return ((iCounter + 1) % nSize) + 1;
 
-    return 1;
+namespace Optimized
+{
+    int KillingDragon(vector<int>& oDungeon, vector<int>& oDrinks)
+    {
+        int nSize = static_cast<int>(oDungeon.size());
+        int oDungeonCap = oDungeon[0];
+        int oDrinkCap = oDrinks[0];
+        vector<int> oPrefixDiff(nSize, (oDrinks[0] - oDungeon[0]));
+        int LastPositiveIdx = oPrefixDiff[0] < 0 ? -2 : 0;
+        for (int jCounter = 1; jCounter < nSize; ++jCounter) {
+            oDungeonCap += oDungeon[jCounter];
+            oDrinkCap += oDrinks[jCounter];
+            oPrefixDiff[jCounter] = oPrefixDiff[(jCounter + nSize - 1) % nSize] + (oDrinks[jCounter] - oDungeon[jCounter]);
+            if (oPrefixDiff[jCounter] < 0)
+                LastPositiveIdx = -2;
+            else
+            {
+                if (LastPositiveIdx == -2)
+                    LastPositiveIdx = jCounter;
+            }
+        }
+
+        return LastPositiveIdx + 1;
+    }
 }
 
 int main()
 {
-    vector<int> oDungeon{ 7, 10, 6 };
-    vector<int> oDrink{ 8, 9, 7 };
-    cout << KillingDragon(oDungeon, oDrink);
+    vector<int> oDungeon{ 1, 5, 7 };
+    vector<int> oDrink{ 2, 6, 3 };
+    cout << Optimized::KillingDragon(oDungeon, oDrink);
     return 0;
 }
 
