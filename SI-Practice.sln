@@ -141,6 +141,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deque", "Deque", "{590A7267
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DequeImplementation", "DequeImplementation\DequeImplementation.vcxproj", "{3D8D24EE-C3BA-4535-9BA4-A4F6030270EE}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SlidingWindowMax", "SlidingWindowMax\SlidingWindowMax.vcxproj", "{AA04B9FA-1687-49AB-98AB-409D6CD14792}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -653,6 +655,14 @@ Global
 		{3D8D24EE-C3BA-4535-9BA4-A4F6030270EE}.Release|x64.Build.0 = Release|x64
 		{3D8D24EE-C3BA-4535-9BA4-A4F6030270EE}.Release|x86.ActiveCfg = Release|Win32
 		{3D8D24EE-C3BA-4535-9BA4-A4F6030270EE}.Release|x86.Build.0 = Release|Win32
+		{AA04B9FA-1687-49AB-98AB-409D6CD14792}.Debug|x64.ActiveCfg = Debug|x64
+		{AA04B9FA-1687-49AB-98AB-409D6CD14792}.Debug|x64.Build.0 = Debug|x64
+		{AA04B9FA-1687-49AB-98AB-409D6CD14792}.Debug|x86.ActiveCfg = Debug|Win32
+		{AA04B9FA-1687-49AB-98AB-409D6CD14792}.Debug|x86.Build.0 = Debug|Win32
+		{AA04B9FA-1687-49AB-98AB-409D6CD14792}.Release|x64.ActiveCfg = Release|x64
+		{AA04B9FA-1687-49AB-98AB-409D6CD14792}.Release|x64.Build.0 = Release|x64
+		{AA04B9FA-1687-49AB-98AB-409D6CD14792}.Release|x86.ActiveCfg = Release|Win32
+		{AA04B9FA-1687-49AB-98AB-409D6CD14792}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -681,6 +691,7 @@ Global
 		{C8CBBCFE-36B4-47D4-ACAB-12FAFD923377} = {51BC2E46-E890-483F-9E47-E11530E483B7}
 		{590A7267-20FF-4770-ABB7-DEEC9FAAAB8A} = {DB8C5C9F-CA9F-4CC3-95BC-9558A1C6C6B1}
 		{3D8D24EE-C3BA-4535-9BA4-A4F6030270EE} = {590A7267-20FF-4770-ABB7-DEEC9FAAAB8A}
+		{AA04B9FA-1687-49AB-98AB-409D6CD14792} = {590A7267-20FF-4770-ABB7-DEEC9FAAAB8A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1AC0239E-6768-442B-A209-89D7A40DE8C7}
