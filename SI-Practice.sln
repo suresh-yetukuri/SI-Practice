@@ -102,6 +102,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LRU Mechanism", "LRU Mechanism\LRU Mechanism.vcxproj", "{6D1CFC9A-621D-422A-930D-A9B0C93299A6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Stack", "Stack", "{CE97A785-2A88-4B95-8B8C-91635E0389F1}"
+	ProjectSection(SolutionItems) = preProject
+		PolishNotationAlgo.txt = PolishNotationAlgo.txt
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Queue", "Queue", "{51BC2E46-E890-483F-9E47-E11530E483B7}"
 EndProject
@@ -142,6 +145,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DequeImplementation", "DequeImplementation\DequeImplementation.vcxproj", "{3D8D24EE-C3BA-4535-9BA4-A4F6030270EE}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SlidingWindowMax", "SlidingWindowMax\SlidingWindowMax.vcxproj", "{AA04B9FA-1687-49AB-98AB-409D6CD14792}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InfixToPostfix", "InfixToPostfix\InfixToPostfix.vcxproj", "{34EE25E1-88A5-4986-8117-06C569D9EFEF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PostfixEvaluation", "PostfixEvaluation\PostfixEvaluation.vcxproj", "{B854D9DB-6364-4E66-8C49-6427E2E4A960}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -663,6 +670,22 @@ Global
 		{AA04B9FA-1687-49AB-98AB-409D6CD14792}.Release|x64.Build.0 = Release|x64
 		{AA04B9FA-1687-49AB-98AB-409D6CD14792}.Release|x86.ActiveCfg = Release|Win32
 		{AA04B9FA-1687-49AB-98AB-409D6CD14792}.Release|x86.Build.0 = Release|Win32
+		{34EE25E1-88A5-4986-8117-06C569D9EFEF}.Debug|x64.ActiveCfg = Debug|x64
+		{34EE25E1-88A5-4986-8117-06C569D9EFEF}.Debug|x64.Build.0 = Debug|x64
+		{34EE25E1-88A5-4986-8117-06C569D9EFEF}.Debug|x86.ActiveCfg = Debug|Win32
+		{34EE25E1-88A5-4986-8117-06C569D9EFEF}.Debug|x86.Build.0 = Debug|Win32
+		{34EE25E1-88A5-4986-8117-06C569D9EFEF}.Release|x64.ActiveCfg = Release|x64
+		{34EE25E1-88A5-4986-8117-06C569D9EFEF}.Release|x64.Build.0 = Release|x64
+		{34EE25E1-88A5-4986-8117-06C569D9EFEF}.Release|x86.ActiveCfg = Release|Win32
+		{34EE25E1-88A5-4986-8117-06C569D9EFEF}.Release|x86.Build.0 = Release|Win32
+		{B854D9DB-6364-4E66-8C49-6427E2E4A960}.Debug|x64.ActiveCfg = Debug|x64
+		{B854D9DB-6364-4E66-8C49-6427E2E4A960}.Debug|x64.Build.0 = Debug|x64
+		{B854D9DB-6364-4E66-8C49-6427E2E4A960}.Debug|x86.ActiveCfg = Debug|Win32
+		{B854D9DB-6364-4E66-8C49-6427E2E4A960}.Debug|x86.Build.0 = Debug|Win32
+		{B854D9DB-6364-4E66-8C49-6427E2E4A960}.Release|x64.ActiveCfg = Release|x64
+		{B854D9DB-6364-4E66-8C49-6427E2E4A960}.Release|x64.Build.0 = Release|x64
+		{B854D9DB-6364-4E66-8C49-6427E2E4A960}.Release|x86.ActiveCfg = Release|Win32
+		{B854D9DB-6364-4E66-8C49-6427E2E4A960}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -692,6 +715,8 @@ Global
 		{590A7267-20FF-4770-ABB7-DEEC9FAAAB8A} = {DB8C5C9F-CA9F-4CC3-95BC-9558A1C6C6B1}
 		{3D8D24EE-C3BA-4535-9BA4-A4F6030270EE} = {590A7267-20FF-4770-ABB7-DEEC9FAAAB8A}
 		{AA04B9FA-1687-49AB-98AB-409D6CD14792} = {590A7267-20FF-4770-ABB7-DEEC9FAAAB8A}
+		{34EE25E1-88A5-4986-8117-06C569D9EFEF} = {CE97A785-2A88-4B95-8B8C-91635E0389F1}
+		{B854D9DB-6364-4E66-8C49-6427E2E4A960} = {CE97A785-2A88-4B95-8B8C-91635E0389F1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1AC0239E-6768-442B-A209-89D7A40DE8C7}

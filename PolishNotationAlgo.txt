@@ -1,0 +1,85 @@
+Polish Notation Algorithms
+
+->Convert Infix to Postfix
+Prequisite: 
+        Add left paranthesis on to the stack.
+        Add right paranthesis at the end of the Infix expressions.
+as a sentinels
+1. Iterate over the expression from the beginning to end
+   a. If symbol is operand, push it to the Postfix string.
+   b. If symbol is left paranthesis push it onto to the stack
+   c. If symbol is right paranthesis
+        -> Take top element from stack and pop out, and then push it to the Postfix string.
+        -> Repeat above steps till you come across left paranthesis
+        -> Pop out the left paranthesis from the stack.
+   d. If symbol is operator
+        -> If top of the stack is not operator, simply push incoming operator on to the stack.
+        -> If incoming operator has higher precedence than the operator which is on top of the stack, 
+           then simply push incoming operator onto the stack.
+        -> If incoming operator has lower precedence than the operator which is on top of the stack,
+           pop out the element from the stack and push it to the postfix string. Keep on doing this with 
+           top of the stack till you arrive at stage where incoming operator could be pushed to the stack.
+        -> If incoming operator has same precedence as that of the operator which on top of the stack,
+           -> If associativity is L->R, Repeat above step.
+           -> If associativity is R->L, simply push incoming operator on to the stack.
+
+
+->Convert Infix to Prefix
+Prequisite: 
+    Reverse the Infix expression
+    Add right paranthesis on to the stack.
+    Add left paranthesis at the end of reversed infix expression.
+1. Iterate over the expression from the beginning to end
+   a. If symbol is operand, push it to the Prefix string.
+   b. If symbol is right paranthesis push it onto to the stack
+   c. If symbol is left paranthesis
+        -> Take top element from stack, pop out, and then push it to the Prefix string.
+        -> Repeat above steps till you come across right paranthesis
+        -> Pop out the right paranthesis from the stack.
+   d. If symbol is operator
+        -> If top of the stack is not operator, simply push incoming operator on to the stack.
+        -> If incoming operator has higher precedence than the operator which is on top of the stack, 
+           then simply push incoming operator onto the stack.
+        -> If incoming operator has lower precedence than the operator which is on top of the stack,
+           pop out the element from the stack and push it to the prefix string. Keep on doing this with 
+           top of the stack till you arrive at stage where incoming operator could be pushed to the stack.
+        -> If incoming operator has same precedence as that of the operator which on top of the stack,
+           -> If associativity is R->L, Repeat above step.
+           -> If associativity is L->R, simply push incoming operator on to the stack.
+2. Once traversal is over, reverse the Prefix string
+
+-> Convert Postfix to Infix
+1. Traverse expression from left to right
+   a. If symbol is operand, simply push it onto the stack.
+   b. If symbol is operator, pop top two element from the stack, first top element is operand 2 and second top element is operand 1
+      create new expression "(" + operand 1 + symbol + operand 2 + ")".
+      Push newly created expression onto the stack.
+   c. Repeat above steps, till the end of expression
+   d. At the end, only one element would be leftout, that is our answer.
+
+-> Convert Prefix to Infix
+1. Traverse expression from right to left
+   a. If symbol is operand, simply push it onto the stack.
+   b. If symbol is operator, pop top two element from the stack, first top element is operand 1 and second top element is operand 2
+      create new expression "(" + operand 1 + symbol + operand 2 + ")".
+      Push newly created expression onto the stack.
+   c. Repeat above steps, till the end of expression
+   d. At the end, only one element would be leftout, that is our answer.
+
+-> Convert Postfix to Prefix
+1. Traverse expression from left to right
+   a. If symbol is operand, simply push it onto the stack.
+   b. If symbol is operator, pop top two element from the stack, first top element is operand 2 and second top element is operand 1
+      create new expression  symbol + operand 1 + operand 2.
+      Push newly created expression onto the stack.
+   c. Repeat above steps, till the end of expression
+   d. At the end, only one element would be leftout, that is our answer.
+
+-> Convert Prefix to Postfix
+1. Traverse expression from right to left
+   a. If symbol is operand, simply push it onto the stack.
+   b. If symbol is operator, pop top two element from the stack, first top element is operand 1 and second top element is operand 2
+      create new expression  operand 1 + operand 2 + symbol.
+      Push newly created expression onto the stack.
+   c. Repeat above steps, till the end of expression
+   d. At the end, only one element would be leftout, that is our answer.
