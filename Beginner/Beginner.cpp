@@ -162,15 +162,8 @@ Initially we can pass INT_MIN as xLastData
 */
 Node* Distinct(Node* pNode, const int xLastData)
 {
-    if ((nullptr == pNode) || (nullptr == pNode->pNext))
-    {
-        if ((nullptr != pNode) && (xLastData == pNode->Data))
-        {
-            delete(pNode);
-            pNode = nullptr;
-        } 
+    if (nullptr == pNode)
         return pNode;
-    }
         
 
     if (xLastData == pNode->Data)
@@ -183,6 +176,44 @@ Node* Distinct(Node* pNode, const int xLastData)
 
     pNode->pNext = Distinct(pNode->pNext, pNode->Data);
     return pNode;
+}
+
+
+Node* DistinctIterative(Node* pNode)
+{
+    if (nullptr == pNode)
+        return pNode;
+
+    Node* pHead = nullptr;
+    Node* pCurrent = nullptr;
+    int oPrevData = INT_MIN;
+
+    do
+    {
+        if (oPrevData == pNode->Data)
+        {
+            Node* pNodeTBD = pNode;
+            pNode = pNode->pNext;
+            delete(pNodeTBD); pNodeTBD = nullptr; 
+        }
+        else
+        {
+            if (nullptr == pHead)
+                pHead = pCurrent = pNode;
+            else
+            {
+                pCurrent->pNext = pNode;
+                pCurrent = pCurrent->pNext; 
+            }
+            oPrevData = pNode->Data;
+            pNode = pNode->pNext;
+        }
+
+    } while (nullptr != pNode);
+    
+
+    pCurrent->pNext = nullptr;
+    return pHead;
 }
 
 /*
@@ -213,6 +244,46 @@ Node* Unique(Node* pNode)
 
     pNode->pNext = Unique(pNode->pNext);
     return pNode;
+}
+
+Node* UniqueIterative(Node* pNode) {
+    if ((nullptr == pNode) || (nullptr == pNode->pNext))
+        return pNode;
+
+    Node* pHead = nullptr;
+    Node* pCurrent = nullptr;
+
+    do {
+        if ((nullptr != pNode->pNext) && (pNode->Data == pNode->pNext->Data))
+        {
+            const int NonUniqueData = pNode->Data;
+            Node* pValidNode = pNode;
+            while ((nullptr != pValidNode) && (NonUniqueData == pValidNode->Data))
+            {
+                Node* pNodeTBD = pValidNode;
+                pValidNode = pValidNode->pNext;
+                delete(pNodeTBD); pNodeTBD = nullptr;
+            }
+
+            pNode = pValidNode;
+        }
+        else
+        {
+            if (nullptr == pHead)
+                pHead = pCurrent = pNode;
+            else {
+                pCurrent->pNext = pNode;
+                pCurrent = pCurrent->pNext;
+            }
+
+            pNode = pNode->pNext;
+        }
+    } while (nullptr != pNode);
+
+    if (nullptr != pCurrent)
+        pCurrent->pNext = nullptr;
+
+    return pHead;
 }
 
 /*
@@ -385,6 +456,47 @@ Node* ReverseBetween(Node* pNode, int m, int n)
     return pNode;
 }
 
+Node* ReverseBetweenIterative(Node* pHead, int m, int n)
+{
+    if ((nullptr == pHead) || (nullptr == pHead->pNext) || (m == n))
+        return pHead;
+
+    Node* pFBTail = nullptr;
+    Node* pMBHead = nullptr;
+    Node* pMBTail = nullptr;
+    Node* pLBHead = nullptr;
+
+    Node* pCurrent = pHead;
+    if (m > 1) {
+        for (int iCounter = 1; iCounter < (m - 1); ++iCounter)
+            pCurrent = pCurrent->pNext;
+
+        pMBHead = pCurrent->pNext;
+        pFBTail = pCurrent;
+        pCurrent->pNext = nullptr;
+        pCurrent = pMBHead;
+    }
+    else {
+        pMBHead = pCurrent;
+    }
+
+    for (int iCounter = m; iCounter < n; ++iCounter)
+        pCurrent = pCurrent->pNext;
+
+    pMBTail = pCurrent;
+    pLBHead = pCurrent->pNext;
+    pCurrent->pNext = nullptr;
+
+    if (nullptr != pFBTail)
+        pFBTail->pNext = Reverse(pMBHead);
+    else
+        pHead = Reverse(pMBHead);
+
+    pMBHead->pNext = pLBHead;
+    return pHead;
+}
+
+
 /*
 Reorder Linked List
 */
@@ -460,37 +572,27 @@ namespace RemoveIterative
 {
     Node* RemoveNthNode(Node* pHead, int xPos)
     {
+        if (nullptr == pHead)
+            return pHead;
+
         int nSize = GetLengthOfList(pHead);
         Node* pNodeTBD = nullptr;
-        if ((nSize - xPos) <= 0)
+        if (xPos < nSize)
         {
-            pNodeTBD = pHead;
-            pHead = pHead->pNext;
+            Node* pCurrent = pHead;
+            for (int iCounter = 1; iCounter < (nSize - xPos); ++iCounter)
+                pCurrent = pCurrent->pNext;
+
+            pNodeTBD = pCurrent->pNext;
+            pCurrent->pNext = pNodeTBD->pNext;
+
         }
         else {
-            Node* pCurrent = pHead;
-            Node* pPrev = nullptr;
-            for (int iCounter = 1; iCounter < (nSize - xPos); ++iCounter) {
-                if (nullptr != pCurrent->pNext) {
-                    pPrev = pCurrent;
-                    pCurrent = pCurrent->pNext;
-                }
-                else
-                    break;
-            }
-            if (nullptr != pCurrent->pNext) {
-                pNodeTBD = pCurrent->pNext;
-                pCurrent->pNext = pNodeTBD->pNext;
-            }
-            else {
-                pNodeTBD = pCurrent;
-                if(nullptr != pPrev)
-                    pPrev->pNext = nullptr;
-            }
+            pNodeTBD = pHead;
+            pHead = pNodeTBD->pNext;
         }
-        
-        delete(pNodeTBD);
-        pNodeTBD = nullptr;
+
+        delete(pNodeTBD); pNodeTBD = nullptr;
         return pHead;
     }
 }
@@ -637,13 +739,10 @@ namespace Rotate
         kSize = kSize % nSize;
         if (0 == kSize)
             return pHead;
-
-        int iCounter = 1;
+         
         Node* pCurrent = pHead;
-        while (iCounter < (nSize - kSize)) {
+        for(int iCounter = 1; iCounter < (nSize-kSize); ++iCounter)
             pCurrent = pCurrent->pNext;
-            ++iCounter;
-        }
 
         Node* pNewHead = pCurrent->pNext;
         pCurrent->pNext = nullptr;
@@ -654,7 +753,7 @@ namespace Rotate
 
         pCurrent->pNext = pHead;
         return pNewHead;
-    } 
+    }
 }
 
 namespace ReverseInGroup
@@ -837,13 +936,14 @@ namespace AddList
 
 int main()
 {
-    vector<int> oLeft{ 9, 9, 1};
+    vector<int> oLeft{ 1,1,1,1,1, 2, 2 , 3, 4 , 6, 8, 10,10 ,12, 15, 18 , 18 };
     vector<int> oRight{ 1};
     Node* pLeft = CreateLinkedList(oLeft, 0);
     Node* pRight = CreateLinkedList(oRight, 0);
     PrintLinkedList(pLeft);
     cout << endl;
-    PrintLinkedList(pRight);
+    pLeft = DistinctIterative(pLeft);
+    PrintLinkedList(pLeft);
     Node* pResult = AddList::AddList(pLeft, pRight);
     cout << endl;
     PrintLinkedList(pResult);
