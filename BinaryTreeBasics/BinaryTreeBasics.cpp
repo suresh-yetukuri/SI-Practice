@@ -6,6 +6,7 @@
 #include <vector>
 #include <stack>
 #include <queue>
+#include <unordered_map>
 using namespace std;
 
 class Node
@@ -299,6 +300,22 @@ namespace Traversals
             }
         }
     }
+
+    /*
+    This won't give correct sequetial order
+    we have to do level order traversal to get correct order
+    */
+    void VerticalLevelOrder(Node* pRoot, int oDepth, unordered_map<int, vector<int>>& oResult, int& oMinDepth, int& oMaxDepth)
+    {
+        if (nullptr == pRoot)
+            return;
+        
+        oMinDepth = min(oDepth, oMinDepth);
+        oMaxDepth = max(oDepth, oMaxDepth);
+        VerticalLevelOrder(pRoot->pLeft, oDepth - 1, oResult, oMinDepth, oMaxDepth);
+        oResult[oDepth].push_back(pRoot->Data);
+        VerticalLevelOrder(pRoot->pRight, oDepth + 1, oResult, oMinDepth, oMaxDepth);
+    }
 }
 
 Node* DeleteTree(Node* pRoot)
@@ -322,7 +339,17 @@ int main()
 {
     vector<int> oInput{ 4, 5, 15, 0, 1, 7, 17 };
     Node* pRoot = BuildTree(oInput);
-    Traversals::BreadthFirst::ZigZagBottomUpLevelorder(pRoot);
+    unordered_map<int, vector<int>> oResult;
+    int oMin = INT_MAX;
+    int oMax = INT_MIN;
+    Traversals::VerticalLevelOrder(pRoot, 0, oResult, oMin, oMax);
+    for (int jCounter = oMin; jCounter <= oMax; ++jCounter)
+    {
+        for (auto& oData : oResult[jCounter])
+            cout << oData << " ";
+
+        cout << endl;
+    }
     //Traversals::DepthFirst::Preorder(pRoot);
     //cout << endl;
     //Traversals::DepthFirst::Inorder(pRoot);
