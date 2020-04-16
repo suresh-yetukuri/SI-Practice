@@ -659,7 +659,149 @@ namespace Problems
         }
     }
 
+    /*
+    Build Binary Tree from Preorder and Inorder
+    */
+    Node* BuildBinaryTreeI(vector<int>& oPreorder, vector<int>& oInorder, int oLow, int oHigh, int& oCurrentIdx)
+    {
+        if (oLow > oHigh)
+            return nullptr;
+
+        Node* pNode = new Node(oPreorder[oCurrentIdx]);
+        int oInorderIdx = -1;
+        for (int iCounter = oLow; iCounter <= oHigh; ++iCounter)
+        {
+            if (oInorder[iCounter] == oPreorder[oCurrentIdx]) {
+                oInorderIdx = iCounter;
+                break;
+            }
+        }
+
+        ++oCurrentIdx;
+        pNode->pLeft = BuildBinaryTreeI(oPreorder, oInorder, oLow, oInorderIdx - 1, oCurrentIdx);
+        pNode->pRight = BuildBinaryTreeI(oPreorder, oInorder, oInorderIdx + 1, oHigh, oCurrentIdx);
+        return pNode;
+    }
+
+    /*
+    Build Binary Tree from Postorder and Inorder
+    */
+    Node* BuildBinaryTreeII(vector<int>& oPostorder, vector<int>& oInorder, int oLow, int oHigh, int& oCurrentIdx)
+    {
+        if (oLow > oHigh)
+            return nullptr;
+
+        Node* pNode = new Node(oPostorder[oCurrentIdx]);
+        int oInorderIdx = -1;
+        for (int iCounter = oLow; iCounter <= oHigh; ++iCounter)
+        {
+            if (oInorder[iCounter] == oPostorder[oCurrentIdx]) {
+                oInorderIdx = iCounter;
+                break;
+            }
+        }
+
+        --oCurrentIdx;
+        pNode->pRight = BuildBinaryTreeII(oPostorder, oInorder, oInorderIdx + 1, oHigh, oCurrentIdx);
+        pNode->pLeft = BuildBinaryTreeII(oPostorder, oInorder, oLow, oInorderIdx - 1, oCurrentIdx);
+        return pNode;
+    }
     
+    /*
+    Diameter of Tree = No of nodes on longest path in a tree
+    Note: Below we calculating height in terms of nodes not edges
+    */
+    namespace DiameterOfBinaryTree
+    {
+        /*
+        N^2, 1
+        */
+        namespace BruteForce
+        {
+            int GetHeightN(Node* pRoot)
+            {
+                if (nullptr == pRoot)
+                    return 0;
+
+                return 1 + max(GetHeightN(pRoot->pLeft), GetHeightN(pRoot->pRight));
+            }
+
+            int GetDiameter(Node* pRoot)
+            {
+                if (nullptr == pRoot)
+                    return 0;
+
+                int oLeftSubtreeHt = GetHeightN(pRoot->pLeft);
+                int oRightSubtreeHt = GetHeightN(pRoot->pRight);
+                // Diameter of tree consider current element to be on 
+                // belt of Diameter of tree
+                int oCurrentDiameter = 1 + oLeftSubtreeHt + oRightSubtreeHt;
+
+                int oLeftSubtreeDiameter = GetDiameter(pRoot->pLeft);
+                int oRightSubtreeDiameter = GetDiameter(pRoot->pRight);
+                return max(oCurrentDiameter, max(oLeftSubtreeDiameter, oRightSubtreeDiameter));
+            }
+        }
+
+        /*
+        N, N
+        */
+        namespace Better
+        {
+            int PopulateHeight(Node* pRoot, unordered_map<Node*, int>& oHashMap)
+            {
+                if (nullptr == pRoot)
+                {
+                    oHashMap[pRoot] = 0;
+                    return 0;
+                }
+
+                int oCurrentHeight = 1 + max(PopulateHeight(pRoot->pLeft, oHashMap),
+                    PopulateHeight(pRoot->pRight, oHashMap));
+                oHashMap[pRoot] = oCurrentHeight;
+                return oCurrentHeight;
+            }
+
+            int GetDiameter(Node* pRoot, unordered_map<Node*, int>& oHashMap)
+            {
+                if (nullptr == pRoot)
+                    return 0;
+
+                int oLeftSubtreeHt = oHashMap[pRoot->pLeft];
+                int oRightSubtreeHt = oHashMap[pRoot->pRight];
+                // Diameter of tree consider current element to be on 
+                // belt of Diameter of tree
+                int oCurrentDiameter = 1 + oLeftSubtreeHt + oRightSubtreeHt;
+
+                int oLeftSubtreeDiameter = GetDiameter(pRoot->pLeft, oHashMap);
+                int oRightSubtreeDiameter = GetDiameter(pRoot->pRight, oHashMap);
+                return max(oCurrentDiameter, max(oLeftSubtreeDiameter, oRightSubtreeDiameter));
+            }
+        }
+        
+        /*
+        N, 1
+        */
+        namespace Efficient
+        {
+            int GetDiameter(Node* pRoot, int& oMaxDia)
+            {
+                if (nullptr == pRoot)
+                    return 0;
+
+                int oLeftSubtreeHt = GetDiameter(pRoot->pLeft, oMaxDia);
+                int oRightSubtreeHt = GetDiameter(pRoot->pRight, oMaxDia);
+                
+                // Diameter of tree consider current element to be on 
+                // belt of Diameter of tree
+                int oCurrentDiameter = 1 + oLeftSubtreeHt + oRightSubtreeHt;
+                oMaxDia = max(oMaxDia, oCurrentDiameter); 
+                return 1+ max(oLeftSubtreeHt, oRightSubtreeHt);
+            }
+
+        }
+    }
+
 }
 
 
