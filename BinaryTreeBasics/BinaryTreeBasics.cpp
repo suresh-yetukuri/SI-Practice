@@ -802,14 +802,142 @@ namespace Problems
         }
     }
 
+    namespace LowestCommonAncestor
+    {
+        namespace Better
+        { 
+            bool FindPath(Node* pRoot, const int oData, deque<Node*>& pStackPath)
+            {
+                if (nullptr == pRoot)
+                    return false;
+
+                pStackPath.push_front(pRoot);
+                if (oData == pRoot->Data)
+                    return true;
+
+                if (FindPath(pRoot->pLeft, oData, pStackPath) || FindPath(pRoot->pRight, oData, pStackPath))
+                    return true;
+
+                pStackPath.pop_front();
+                return false;
+            }
+            
+            Node* LCA(Node* pRoot, const int oFData, const int oSData)
+            {
+                Node* pLCA = nullptr; 
+                
+                if (nullptr != pRoot)
+                {
+                    deque<Node*> pFStackPath, pSStackPath;
+                    if (FindPath(pRoot, oFData, pFStackPath) && FindPath(pRoot, oSData, pSStackPath))
+                    {
+                        while (!pFStackPath.empty() && !pSStackPath.empty())
+                        {
+                            if (pFStackPath.back() == pSStackPath.back())
+                            { 
+                                pLCA = pFStackPath.back();
+                                pFStackPath.pop_back();
+                                pSStackPath.pop_back();
+                            }
+                            else 
+                                break;
+                        }
+                    }
+                }
+
+                return pLCA;
+            }
+        }
+
+        namespace Simpler
+        {
+            bool FindPath(Node* pRoot, const int oData, stack<Node*>& pStackPath)
+            {
+                if (nullptr != pRoot) 
+                {
+                    if (oData == pRoot->Data
+                        || FindPath(pRoot->pLeft, oData, pStackPath)
+                        || FindPath(pRoot->pRight, oData, pStackPath))
+                    {
+                        pStackPath.push(pRoot);
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            Node* LCA(Node* pRoot, const int oFData, const int oSData)
+            {
+                Node* pLCA = nullptr;
+
+                if (nullptr != pRoot)
+                {
+                    stack<Node*> pFStackPath, pSStackPath;
+                    if (FindPath(pRoot, oFData, pFStackPath) && FindPath(pRoot, oSData, pSStackPath))
+                    {
+                        while (!pFStackPath.empty() && !pSStackPath.empty())
+                        {
+                            if (pFStackPath.top() == pSStackPath.top())
+                            {
+                                pLCA = pFStackPath.top();
+                                pFStackPath.pop();
+                                pSStackPath.pop();
+                            }
+                            else
+                                break;
+                        }
+                    }
+                }
+
+                return pLCA;
+            }
+        }
+
+        /*
+        This method assumes that both data should be available in tree
+        Otherwise, it is going to give wrong result;
+        */
+        namespace Efficient
+        {
+            Node* LCA(Node* pRoot, int oFData, int oSData)
+            {
+                Node* pLCA = nullptr; 
+                if (nullptr != pRoot)
+                { 
+                    if (oFData == pRoot->Data || oSData == pRoot->Data)
+                        pLCA = pRoot;
+                    else
+                    { 
+                        Node* pLeftLCA = LCA(pRoot->pLeft, oFData, oSData);
+                        Node* pRightLCA = LCA(pRoot->pRight, oFData, oSData);
+                         
+                        if (nullptr != pLeftLCA && nullptr != pRightLCA)  
+                            pLCA = pRoot;
+                        else if (nullptr != pLeftLCA)
+                            pLCA = pLeftLCA;
+                        else
+                            pLCA = pRightLCA;
+                    }
+                }
+
+                return pLCA;
+            } 
+        }
+    }
 }
 
 
 
 int main()
 {
-    vector<int> oInput{ 4, 6, 5, 2, 15, 0, 1, 7, 17 };
+    deque<int> oDeque;
+    oDeque.push_front(1);
+    oDeque.push_front(2);
+    oDeque.push_back(3);
+    vector<int> oInput{ 50, 20, 10, 30 };
     Node* pRoot = BuildTree(oInput);
+    Node* pLCA = Problems::LowestCommonAncestor::Simpler::LCA(pRoot, 30, 10);
     int oCount = Problems::MaxWidthOfBinaryTree(pRoot);
     Problems::NodesAtDistanceKFromRoot(pRoot, 2);
     int oSize = GetSize(pRoot);
