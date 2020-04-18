@@ -7,6 +7,7 @@
 #include <stack>
 #include <queue>
 #include <unordered_map>
+#include <math.h>
 using namespace std;
 
 class Node
@@ -925,7 +926,129 @@ namespace Problems
             } 
         }
     }
+
+    /*
+    Given a binary tree, our task is to count toal nodes.  
+    Efficient method which is O(Log n * Log n)
+    */
+    int CountCBTNodes(Node* pRoot)
+    {
+        Node* pCurrent = pRoot;
+        int oLeftHeight = 0;
+        int oRightHeight = 0;
+        while (nullptr != pCurrent)
+        {
+            ++oLeftHeight;
+            pCurrent = pCurrent->pLeft;
+        }
+
+        pCurrent = pRoot;
+        while (nullptr != pCurrent)
+        {
+            ++oRightHeight;
+            pCurrent = pCurrent->pRight;
+        }
+
+        if (oLeftHeight == oRightHeight)
+            return static_cast<int>(pow(2, oLeftHeight) - 1); // In case if it is perfect binary tree
+
+        return 1 + CountCBTNodes(pRoot->pLeft) + CountCBTNodes(pRoot->pRight);
+    }
+
+    /*
+    We are given a binary tree and a leaf node, 
+    we need to find time to burn the Binary Tree 
+    if we burn the given leaf at 0-th second
+    */
+    int BurnTime(Node* pRoot, int oLeafData, int& oDistance, int& oMaxBurnTime)
+    {
+        if (nullptr == pRoot)
+            return 0;
+
+        if (pRoot->Data == oLeafData)  {
+            oDistance = 0;
+            return 1;
+        }
+
+        int oLeftDistance = -1;
+        int oRightDistance = -1;
+        int oLeftHeight = BurnTime(pRoot->pLeft, oLeafData, oLeftDistance, oMaxBurnTime);
+        int oRightHeight = BurnTime(pRoot->pRight, oLeafData, oRightDistance, oMaxBurnTime);
+        if (oLeftDistance != -1) {
+            oDistance = 1 + oLeftDistance;
+            oMaxBurnTime = max(oMaxBurnTime, oDistance + oRightHeight);
+        } 
+        else if (oRightDistance != -1)  {
+            oDistance = 1 + oRightDistance;
+            oMaxBurnTime = max(oMaxBurnTime, oDistance + oLeftHeight);
+        }
+        return 1 + max(oLeftHeight, oRightHeight);
+    }
+
+    /*
+    Below method is based on Preorder traversal
+    */
+    namespace SerializeDeserializeBT
+    {
+        const int EMPTY = -1;
+
+        void Serialize(Node* pRoot, vector<int>& pStream)
+        {
+            if (nullptr == pRoot)
+            {
+                pStream.push_back(EMPTY);
+                return;
+            }
+
+            pStream.push_back(pRoot->Data);
+            Serialize(pRoot->pLeft, pStream);
+            Serialize(pRoot->pRight, pStream);
+            return;
+        }
+
+
+
+        Node* Deserialize(vector<int>& pStream, int& oCurrentIdx)
+        {
+            if ((EMPTY == pStream[oCurrentIdx]) || (oCurrentIdx >= static_cast<int>(pStream.size())))
+            {
+                ++oCurrentIdx;
+                return nullptr;
+            }
+                
+
+            Node* pNode = new Node(pStream[oCurrentIdx++]); 
+            pNode->pLeft = Deserialize(pStream, oCurrentIdx);
+            pNode->pRight = Deserialize(pStream, oCurrentIdx);
+            return pNode;
+        }
+    }
+
+    bool IsFBT(Node* pRoot)
+    {
+        if (nullptr == pRoot)
+            return true;
+
+        if ((nullptr != pRoot->pLeft && nullptr == pRoot->pRight)
+            || (nullptr != pRoot->pRight && nullptr == pRoot->pLeft))
+            return false;
+
+        return IsFBT(pRoot->pLeft) && IsFBT(pRoot->pRight);
+    }
+
+    bool IsCBT(Node* pRoot, int oCurrentIdx, int nCount)
+    {
+        if (nullptr == pRoot)
+            return true;
+
+        if (oCurrentIdx >= nCount)
+            return false;
+
+        return IsCBT(pRoot->pLeft, (2 * oCurrentIdx) + 1, nCount)
+            && IsCBT(pRoot->pRight, (2 * oCurrentIdx) + 2, nCount);
+    }
 }
+
 
 
 
@@ -935,8 +1058,17 @@ int main()
     oDeque.push_front(1);
     oDeque.push_front(2);
     oDeque.push_back(3);
-    vector<int> oInput{ 50, 20, 10, 30 };
+    vector<int> oInput{ 50, 20, 10, 30, 60, 80,55, 90 };
     Node* pRoot = BuildTree(oInput);
+    Traversals::DepthFirst::Inorder(pRoot);
+    cout << endl;
+    //Serialize
+    vector<int> oStream;
+    Problems::SerializeDeserializeBT::Serialize(pRoot, oStream);
+    int oCurrentIdx = 0;
+    Node* pDeserialized = Problems::SerializeDeserializeBT::Deserialize(oStream, oCurrentIdx);
+    Traversals::DepthFirst::Inorder(pDeserialized);
+    int oCountNodes = Problems::CountCBTNodes(pRoot);
     Node* pLCA = Problems::LowestCommonAncestor::Simpler::LCA(pRoot, 30, 10);
     int oCount = Problems::MaxWidthOfBinaryTree(pRoot);
     Problems::NodesAtDistanceKFromRoot(pRoot, 2);
