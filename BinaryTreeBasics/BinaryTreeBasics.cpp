@@ -463,6 +463,87 @@ namespace Views
             }
         }
     }
+
+    namespace BottomView
+    {
+        void BottomView(Node* pRoot)
+        {
+            if (nullptr != pRoot)
+            {
+                unordered_map<int, vector<int>> oVerticalHashMap;
+                queue<pair<Node*, int>> pQueue;
+                int oMinDepth = INT_MAX;
+                int oMaxDepth = INT_MIN;
+                pQueue.push(make_pair(pRoot, 0));
+                while (!pQueue.empty())
+                {
+                    int nSize = static_cast<int>(pQueue.size());
+                    for (int iCounter = 0; iCounter < nSize; ++iCounter)
+                    {
+                        auto oCurrentPair = pQueue.front();
+                        auto oCurrentDepth = oCurrentPair.second;
+                        auto pCurrentNode = oCurrentPair.first;
+                        pQueue.pop();
+
+                        oVerticalHashMap[oCurrentDepth].push_back(pCurrentNode->Data);
+                        oMinDepth = min(oMinDepth, oCurrentDepth);
+                        oMaxDepth = max(oMaxDepth, oCurrentDepth);
+
+                        if (nullptr != pCurrentNode->pLeft)
+                            pQueue.push(make_pair(pCurrentNode->pLeft, oCurrentDepth - 1));
+
+                        if(nullptr != pCurrentNode->pRight)
+                            pQueue.push(make_pair(pCurrentNode->pRight, oCurrentDepth + 1));
+                    }
+                }
+
+                for (int iCounter = oMinDepth; iCounter <= oMaxDepth; ++iCounter)
+                {
+                    int nSize = static_cast<int>(oVerticalHashMap[iCounter].size());
+                    std::cout << oVerticalHashMap[iCounter][nSize - 1] << " ";
+                }
+            }
+        }
+    }
+
+    namespace TopView
+    {
+        void TopView(Node* pRoot)
+        {
+            if (nullptr != pRoot)
+            {
+                unordered_map<int, vector<int>> oVerticalHashMap;
+                queue<pair<Node*, int>> pQueue;
+                int oMinDepth = INT_MAX;
+                int oMaxDepth = INT_MIN;
+                pQueue.push(make_pair(pRoot, 0));
+                while (!pQueue.empty())
+                {
+                    int nSize = static_cast<int>(pQueue.size());
+                    for (int iCounter = 0; iCounter < nSize; ++iCounter)
+                    {
+                        auto oCurrentPair = pQueue.front();
+                        auto oCurrentDepth = oCurrentPair.second;
+                        auto pCurrentNode = oCurrentPair.first;
+                        pQueue.pop();
+
+                        oVerticalHashMap[oCurrentDepth].push_back(pCurrentNode->Data);
+                        oMinDepth = min(oMinDepth, oCurrentDepth);
+                        oMaxDepth = max(oMaxDepth, oCurrentDepth);
+
+                        if (nullptr != pCurrentNode->pLeft)
+                            pQueue.push(make_pair(pCurrentNode->pLeft, oCurrentDepth - 1));
+
+                        if (nullptr != pCurrentNode->pRight)
+                            pQueue.push(make_pair(pCurrentNode->pRight, oCurrentDepth + 1));
+                    }
+                }
+
+                for (int iCounter = oMinDepth; iCounter <= oMaxDepth; ++iCounter) 
+                    std::cout << oVerticalHashMap[iCounter][0] << " ";
+            }
+        }
+    }
 }
 
 Node* DeleteTree(Node* pRoot)
@@ -1046,6 +1127,56 @@ namespace Problems
 
         return IsCBT(pRoot->pLeft, (2 * oCurrentIdx) + 1, nCount)
             && IsCBT(pRoot->pRight, (2 * oCurrentIdx) + 2, nCount);
+    }
+
+    namespace ConnectNodesAtSameLevel
+    {
+        class Node
+        {
+        public:
+            int Data;
+            Node* pLeft;
+            Node* pRight;
+            Node* pNextRight;
+            Node(int val)
+            {
+                this->Data = val;
+                this->pLeft = nullptr;
+                this->pRight = nullptr;
+                this->pNextRight = nullptr;
+            }
+        };
+
+        void ConnectNodes(Node* pRoot)
+        {
+            if (nullptr != pRoot)
+            {
+                queue<Node*> pQueue;
+                pQueue.push(pRoot);
+                while (!pQueue.empty())
+                {
+                    int nSize = static_cast<int>(pQueue.size());
+                    Node* pPrev = nullptr;
+                    for (int iCounter = 0; iCounter < nSize; ++iCounter)
+                    {
+                        Node* pCurrent = pQueue.front();
+                        pQueue.pop();
+
+                        if (nullptr != pCurrent->pLeft)
+                            pQueue.push(pCurrent->pLeft);
+
+                        if (nullptr != pCurrent->pRight)
+                            pQueue.push(pCurrent->pRight);
+
+                        pCurrent->pNextRight = nullptr;
+                        if (nullptr != pPrev)
+                            pPrev->pNextRight = pCurrent;
+
+                        pPrev = pCurrent;
+                    }
+                }
+            }
+        }
     }
 }
 
