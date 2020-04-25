@@ -6,6 +6,8 @@
 #include <set>
 #include <unordered_set>
 #include <algorithm>
+#include <queue>
+#include <stack>
 using namespace std;
 
 class Node
@@ -329,6 +331,138 @@ namespace CheckBST
     }
 }
 
+
+Node* Find(Node* pRoot, int oData)
+{
+    Node* pCurrent = pRoot;
+    while (nullptr != pCurrent)
+    {
+        if (pCurrent->Data == oData)
+            return pCurrent;
+        else if (pCurrent->Data > oData)
+            pCurrent = pCurrent->pLeft;
+        else
+            pCurrent = pCurrent->pRight;
+    }
+
+    return pCurrent;
+}
+
+Node* GetInorderSuccesor(Node* pRoot, int oData)
+{
+    Node* pTarget = Find(pRoot, oData);
+    if (nullptr != pTarget)
+    {
+        // Case: 1 When rightSubtree Exist
+        if (nullptr != pTarget->pRight)
+        {
+            Node* pSuccesor = pTarget->pRight;
+            while (nullptr != pSuccesor->pLeft)
+                pSuccesor = pSuccesor->pLeft;
+
+            return pSuccesor;
+        }
+        // Case: 2 Where we need to look for ancestors
+        else
+        {
+            Node* pAncestor = pRoot;
+            Node* pSuccessor = nullptr;
+            while (pTarget != pAncestor)
+            {
+                if (pAncestor->Data > pTarget->Data)
+                {
+                    pSuccessor = pAncestor; // So far this is deepest node for which Target node is in left
+                    pAncestor = pAncestor->pLeft;
+                }
+                else
+                    pAncestor = pAncestor->pRight;
+            }
+
+            return pSuccessor;
+        }
+    }
+
+    return nullptr;
+}
+
+Node* GetInorderPredecessor(Node* pRoot, int oData)
+{
+    Node* pTarget = Find(pRoot, oData);
+    if (nullptr != pTarget)
+    {
+        // Case: 1 When leftSubtree Exist
+        if (nullptr != pTarget->pLeft)
+        {
+            Node* Predecessor = pTarget->pLeft;
+            while (nullptr != Predecessor->pRight)
+                Predecessor = Predecessor->pRight;
+
+            return Predecessor;
+        }
+        // Case: 2 Where we need to look for ancestors
+        else
+        {
+            Node* pAncestor = pRoot;
+            Node* Predecessor = nullptr;
+            while (pTarget != pAncestor)
+            {
+                if (pAncestor->Data < pTarget->Data)
+                {
+                    Predecessor = pAncestor; // So far this is deepest node for which Target node is in right
+                    pAncestor = pAncestor->pRight;
+                }
+                else
+                    pAncestor = pAncestor->pLeft;
+            }
+
+            return Predecessor;
+        }
+    }
+
+    return nullptr;
+}
+
+void GetInorderSuccPred(Node* pRoot, int oData, Node*& pPre, Node*& pSucc)
+{
+    if (nullptr == pRoot)
+        return;
+
+    if (oData == pRoot->Data)
+    {
+        if (nullptr != pRoot->pLeft)
+        {
+            Node* pPredecessor = pRoot->pLeft;
+            while (nullptr != pPredecessor->pRight)
+                pPredecessor = pPredecessor->pRight;
+
+            pPre = pPredecessor;
+        }
+
+        if (nullptr != pRoot->pRight)
+        {
+            Node* pSuccesor = pRoot->pRight;
+            while (nullptr != pSuccesor->pLeft)
+                pSuccesor = pSuccesor->pLeft;
+
+            pSucc = pSuccesor;
+        }
+        return;
+    }
+
+    if (oData < pRoot->Data)
+    {
+        pSucc = pRoot;
+        GetInorderSuccPred(pRoot->pLeft, oData, pPre, pSucc);
+    }
+    else
+    {
+        pPre = pRoot;
+        GetInorderSuccPred(pRoot->pRight, oData, pPre, pSucc);
+    }
+
+    return;
+}
+
 /*
 Given a binary search tree with two swapped nodes, 
 the task is to fix the binary search tree by swapping them back.
@@ -395,9 +529,202 @@ namespace PairWithGivenSumInBST
     }
 }
 
+/*
+Given a Binary Search Tree (BST) and a range, 
+print all the numbers in the BST that lie in the given range l-h(inclusive) in non-decreasing order. 
+If no such element exists, an empty line will be printed.
+*/
+void ElementsInRange(Node* pRoot, int l, int h)
+{
+    if (nullptr == pRoot)
+        return;
+
+    if (pRoot->Data > l && pRoot->Data > h) 
+        ElementsInRange(pRoot->pLeft, l, h); 
+    else if (pRoot->Data < l && pRoot->Data < h) 
+        ElementsInRange(pRoot->pRight, l, h); 
+    else
+    {
+        ElementsInRange(pRoot->pLeft, l, h);
+        cout << pRoot->Data << " ";
+        ElementsInRange(pRoot->pRight, l, h);
+    }
+}
+
+Node* CreateBSTFromLevelOrderTraversal(vector<int>& oInput)
+{
+    struct ChildCondition
+    {
+        pair<int, int> oLeftChild;
+        pair<int, int> oRightChild;
+    };
+
+    Node* pRoot = nullptr;
+    int nSize = static_cast<int>(oInput.size());
+    if (nSize > 0)
+    {
+        int oCurrentIdx = 0;
+        pRoot = new Node(oInput[oCurrentIdx++]);
+        queue < pair<Node*, ChildCondition>> pQueue;
+        pQueue.push(make_pair(pRoot, ChildCondition{ make_pair(INT_MIN, pRoot->Data), make_pair(pRoot->Data, INT_MAX) }));
+        while ((oCurrentIdx < nSize) && !pQueue.empty())
+        {
+            Node* pCurrentParent = pQueue.front().first;
+            pair<int, int> oLeftChild = pQueue.front().second.oLeftChild;
+            pair<int, int> oRightChild = pQueue.front().second.oRightChild;
+
+            if (oInput[oCurrentIdx] > oLeftChild.first && oInput[oCurrentIdx] < oLeftChild.second)
+            {
+                Node* pNode = new Node(oInput[oCurrentIdx++]);
+                pCurrentParent->pLeft = pNode;
+                pQueue.push(make_pair(pNode, ChildCondition{ make_pair(oLeftChild.first, pNode->Data), make_pair(pNode->Data, oLeftChild.second) }));
+            }
+
+            if ((oCurrentIdx < nSize) && oInput[oCurrentIdx] > oRightChild.first && oInput[oCurrentIdx] < oRightChild.second)
+            {
+                Node* pNode = new Node(oInput[oCurrentIdx++]);
+                pCurrentParent->pRight = pNode;
+                pQueue.push(make_pair(pNode, ChildCondition{ make_pair(oRightChild.first, pNode->Data), make_pair(pNode->Data, oRightChild.second) }));
+            }
+            pQueue.pop();
+        }
+    }
+
+    return pRoot;
+}
+
+
+namespace PreOrderToBST
+{
+    Node* CreateBSTFromPreOrder(vector<int>& oInput, int oCurrentIdx, int oLastIdx)
+    {
+        if (oCurrentIdx > oLastIdx)
+            return nullptr;
+
+        Node* pNode = new Node(oInput[oCurrentIdx]);
+        int oRtSubtreeIdx = oCurrentIdx + 1;
+
+        // Find Starting index for rightSubtree
+        for (int iCounter = oCurrentIdx + 1; iCounter <= oLastIdx; ++iCounter)
+        {
+            if (oInput[iCounter] > oInput[oCurrentIdx])
+            {
+                oRtSubtreeIdx = iCounter;
+                break;
+            }
+        }
+
+        pNode->pLeft = CreateBSTFromPreOrder(oInput, oCurrentIdx + 1, oRtSubtreeIdx - 1);
+        pNode->pRight = CreateBSTFromPreOrder(oInput, oRtSubtreeIdx, oLastIdx);
+        return pNode;
+    }
+
+    Node* CreateBSTFromPreOrderI(vector<int>& oInput, int& oCurrentIdx, int oMin, int oMax)
+    {
+        if (oCurrentIdx >= static_cast<int>(oInput.size()))
+            return nullptr;
+
+        
+        if (oInput[oCurrentIdx] > oMin && oInput[oCurrentIdx] < oMax)
+        {
+            Node* pNode = new Node(oInput[oCurrentIdx++]);
+            pNode->pLeft = CreateBSTFromPreOrderI(oInput, oCurrentIdx, oMin, pNode->Data);
+            pNode->pRight = CreateBSTFromPreOrderI(oInput, oCurrentIdx, pNode->Data, oMax);
+            return pNode;
+        }
+
+        return nullptr;
+    }
+}
+
+ 
+void PreOrder(Node* pRoot)
+{
+    if (nullptr != pRoot)
+    {
+        cout << pRoot->Data << " ";
+        PreOrder(pRoot->pLeft);
+        PreOrder(pRoot->pRight);
+    }
+}
+
+void PostOrder(Node* pRoot)
+{
+    if (nullptr != pRoot)
+    { 
+        PostOrder(pRoot->pLeft);
+        PostOrder(pRoot->pRight);
+        cout << pRoot->Data << " ";
+    }
+}
+
+
+namespace Iterators
+{
+    class InorderIterator
+    {
+    public:
+        InorderIterator(const Node* pRoot)
+        {
+            this->pRoot = pRoot;
+            this->pCurrent = pRoot;
+        }
+
+        bool End()
+        {
+            return pStack.empty() && (nullptr == pCurrent);
+        }
+
+        bool Next()
+        { 
+            if (!pStack.empty()) {
+                const Node* pNode = pStack.top();
+                pStack.pop();
+                if (nullptr != pNode->pRight)
+                    pCurrent = pNode->pRight;
+            }
+
+            while (nullptr != pCurrent) {
+                pStack.push(pCurrent);
+                pCurrent = pCurrent->pLeft;
+            }
+             
+            return pStack.empty() == false;
+        }
+
+        const Node* Current()
+        {
+            if (!pStack.empty()) 
+                return pStack.top();
+            else
+                return nullptr;
+        }
+
+    private:
+        stack<const Node*> pStack;
+        const Node* pCurrent;
+        const Node* pRoot;
+    };
+}
+
+// Nodes At distance k
+// Smaller on Right
+// DLL to BST
+
 int main()
 {
-    vector<int> oInput{ 50, 20, 100, 10, 40, 70, 120, 60, 80, 4 };
+    vector<int> oInput{ 40, 30, 32, 35, 80, 90, 100, 120 };
+    int oCurrentIdx = 0;
+    Node* pNode = PreOrderToBST::CreateBSTFromPreOrderI(oInput, oCurrentIdx, INT_MIN, INT_MAX);
+    //PostOrder(pNode);
+    Iterators::InorderIterator* pItr = new Iterators::InorderIterator(pNode);
+    while (pItr->Next())
+        cout << pItr->Current()->Data << " ";
+
+
+
+
+
    // CeilOnLeft(oInput);
 
     KthSmallestElement::Node* pRoot = nullptr;

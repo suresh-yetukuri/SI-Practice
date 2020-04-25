@@ -137,17 +137,95 @@ Node* Insert(Node* pRoot, const int oData)
     return Balance(pRoot);
 }
 
+Node* GetPredecessor(Node* pNode)
+{
+    Node* pCurrent = pNode->pLeft;
+    while (nullptr != pCurrent && nullptr != pCurrent->pRight)
+        pCurrent = pCurrent->pRight;
+
+    return pCurrent;
+}
+
+Node* GetSuccessor(Node* pNode)
+{
+    Node* pCurrent = pNode->pRight;
+    while (nullptr != pCurrent && nullptr != pCurrent->pLeft)
+        pCurrent = pCurrent->pLeft;
+
+    return pCurrent;
+}
+
 Node* Delete(Node* pRoot, const int oData)
 {
 
+    if (nullptr != pRoot)
+    {
+        if (oData > pRoot->Data)
+            pRoot->pRight = Delete(pRoot->pRight, oData);
+        else if (oData < pRoot->Data)
+            pRoot->pLeft = Delete(pRoot->pLeft, oData);
+        else
+        {
+            if (nullptr == pRoot->pLeft && nullptr == pRoot->pRight)
+            {
+                delete(pRoot);
+                pRoot = nullptr;
+            }
+            else if (nullptr != pRoot->pLeft && nullptr == pRoot->pRight)
+            {
+                Node* pNodeTBD = pRoot;
+                pRoot = pRoot->pLeft;
+                delete(pNodeTBD);
+                pNodeTBD = nullptr;
+            }
+            else if (nullptr == pRoot->pLeft && nullptr != pRoot->pRight)
+            {
+                Node* pNodeTBD = pRoot;
+                pRoot = pRoot->pRight;
+                delete(pNodeTBD);
+                pNodeTBD = nullptr;
+            }
+            else
+            {
+                if (pRoot->pLeft->Height > pRoot->pRight->Height)
+                {
+                    Node* pReplaceableNode = GetPredecessor(pRoot);
+                    pRoot->Data = pReplaceableNode->Data;
+                    pRoot->pLeft = Delete(pRoot->pLeft, pReplaceableNode->Data);
+                }
+                else
+                {
+                    Node* pReplaceableNode = GetSuccessor(pRoot);
+                    pRoot->Data = pReplaceableNode->Data;
+                    pRoot->pRight = Delete(pRoot->pRight, pReplaceableNode->Data);
+                }
+            }
+        }
+
+        if (nullptr != pRoot) {
+            pRoot->Update();
+            pRoot = Balance(pRoot);
+        }
+    }
+      
+    return pRoot;
 }
 
 int main()
 {
-    vector<int> oInput{ 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
+    vector<int> oInput{ 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 5, 2 };
     Node* pRoot = nullptr;
     for (auto& oData : oInput)
         pRoot = Insert(pRoot, oData);
+
+
+
+    pRoot = Delete(pRoot, 40);
+    pRoot = Delete(pRoot, 60);
+    pRoot = Delete(pRoot, 80);
+    pRoot = Delete(pRoot, 40);
+    pRoot = Delete(pRoot, 100);
+    pRoot = Delete(pRoot, 90);
 
     return 0;
 }
