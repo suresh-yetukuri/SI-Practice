@@ -299,7 +299,7 @@ namespace HeapSort
                     oLargestIdx = oRightIdx;
 
                 if (oLargestIdx != oCurrentIdx)
-                {
+                { 
                     swap(oContainer[oCurrentIdx], oContainer[oLargestIdx]);
                     heapify(oLargestIdx);
                 }

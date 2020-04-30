@@ -5,6 +5,7 @@
 #include <vector>
 #include <set>
 #include <unordered_set>
+#include <unordered_map>
 #include <algorithm>
 #include <queue>
 #include <stack>
@@ -711,9 +712,345 @@ namespace Iterators
 // Smaller on Right
 // DLL to BST
 
+
+/*
+LogN, 1
+*/
+namespace DistanceBetweenTwoNodes
+{
+    int FindDepth(Node* pRoot, int oData)
+    {
+        if (nullptr == pRoot)
+            return -1;
+        else if (pRoot->Data == oData)
+            return 0;
+        else
+        {
+            int oCurDist = -1;
+            if (pRoot->Data < oData) 
+               oCurDist = FindDepth(pRoot->pRight, oData);  
+            else 
+               oCurDist = FindDepth(pRoot->pLeft, oData);
+
+            if (oCurDist >= 0)
+                return 1 + oCurDist;
+            else
+                return -1;
+        }
+    }
+
+    int FindLCADepth(Node* pRoot, int oFData, int oSData)
+    {
+        if (nullptr == pRoot)
+            return -1;
+
+        int oCurrDistance = -1;
+        if (pRoot->Data > max(oFData, oSData)) 
+            oCurrDistance = FindLCADepth(pRoot->pLeft, oFData, oSData);
+        else if (pRoot->Data < min(oFData, oSData))
+            oCurrDistance = FindLCADepth(pRoot->pRight, oFData, oSData);
+        else
+            return 0;
+
+        if (oCurrDistance >= 0)
+            return 1 + oCurrDistance;
+
+        return -1;
+    }
+
+    int DistanceBetween(Node* pRoot, int oFData, int oSData)
+    {
+        if (nullptr != pRoot)
+        {
+            int oFDepth = -1;
+            int oSDepth = -1;
+
+            oFDepth = FindDepth(pRoot, oFData);
+            if(oFDepth >= 0)
+                oSDepth = FindDepth(pRoot, oSData);
+
+            if (min(oFDepth, oSDepth) >= 0)
+            {
+                int oLCADepth = FindLCADepth(pRoot, oFData, oSData);
+                return (oFDepth + oSDepth) - (2 * oLCADepth);
+            }
+        }
+
+        return -1;
+    }
+}
+
+
+
+namespace NodesAtDistanceKFromSource
+{
+    /*
+       We Traverse each node get Distance between two nodes and then count
+       NLogN, 1
+   */
+    namespace BruteForce
+    {
+        int GetCount(Node* pRoot, Node* pCurrentNode, int oSourceData, int kDistance)
+        {
+            if (nullptr == pCurrentNode)
+                return 0;
+
+            int oCount = 0;
+            if (kDistance == DistanceBetweenTwoNodes::DistanceBetween(pRoot, pCurrentNode->Data, oSourceData)) // LogN
+                ++oCount;
+
+            return oCount + GetCount(pRoot, pCurrentNode->pLeft, oSourceData, kDistance)
+                + GetCount(pRoot, pCurrentNode->pRight, oSourceData, kDistance);
+        }
+    }
+
+    /*
+    Using BFS
+    */
+    namespace Better
+    {
+        /*
+        N,1
+        */
+        void BuildRelationMap(Node* pRoot, Node* pParent, unordered_map<Node*, Node*>& oParentChildMap)
+        {
+            if (nullptr == pRoot)
+                return;
+
+            oParentChildMap[pRoot] = pParent;
+            BuildRelationMap(pRoot->pLeft, pRoot, oParentChildMap);
+            BuildRelationMap(pRoot->pRight, pRoot, oParentChildMap);
+        }
+
+        /*
+        LogN, 1
+        */
+        Node* FindNode(Node* pRoot, int oData)
+        {
+            if (nullptr == pRoot)
+                return nullptr;
+
+            if (pRoot->Data == oData)
+                return pRoot;
+            else if (pRoot->Data > oData)
+                return FindNode(pRoot->pLeft, oData);
+            else
+                return FindNode(pRoot->pRight, oData);
+        }
+
+        /*
+        N + LogN + N, N + N + (Diameter of Tree)
+        */
+        int GetCount(Node* pRoot, int oTargetData, int kDistance)
+        {
+            if (nullptr != pRoot)
+            { 
+                Node* pNode = FindNode(pRoot, oTargetData);
+                if (nullptr != pNode)
+                {
+                    unordered_map<Node*, Node*> oParentChildMap;
+                    BuildRelationMap(pRoot, nullptr, oParentChildMap);
+                     
+                    queue<Node*> pQueue;
+                    unordered_set<int> oVisited;
+
+                    int oCurrentDistance = 0;
+                    pQueue.push(pNode);
+                    oVisited.insert(pNode->Data);
+                    
+                    auto IsVisited = [&oVisited](Node* pNode)->bool {
+                        return nullptr != pNode &&
+                            (oVisited.find(pNode->Data) != oVisited.end());
+                    };
+                     
+                    // BFS
+                    while (!pQueue.empty())
+                    {
+                        if (oCurrentDistance == kDistance)
+                            break;
+                        else
+                        {
+                            int nNodesCount = static_cast<int>(pQueue.size());
+                            for (int iCounter = 0; iCounter < nNodesCount; ++iCounter)
+                            {
+                                Node* pCurrentNode = pQueue.front();
+                                pQueue.pop();
+
+                                if (nullptr != pCurrentNode->pLeft && !IsVisited(pCurrentNode->pLeft)) {
+                                    pQueue.push(pCurrentNode->pLeft); 
+                                    oVisited.insert(pCurrentNode->pLeft->Data);
+                                }
+
+                                if (nullptr != pCurrentNode->pRight && !IsVisited(pCurrentNode->pRight)) {
+                                    pQueue.push(pCurrentNode->pRight);
+                                    oVisited.insert(pCurrentNode->pRight->Data);
+                                }
+
+                                if (nullptr != oParentChildMap[pCurrentNode] && !IsVisited(oParentChildMap[pCurrentNode])) {
+                                    pQueue.push(oParentChildMap[pCurrentNode]);
+                                    oVisited.insert(oParentChildMap[pCurrentNode]->Data);
+                                } 
+                            }
+
+                            ++oCurrentDistance;
+                        }
+                    }
+
+                    if(!pQueue.empty())
+                        return static_cast<int>(pQueue.size());
+                }
+            }
+
+            return 0;
+        }
+    }
+
+    /*
+    Need to figure out complexity
+    */
+    namespace BetterII
+    {
+        int GetCountBelow(Node* pRoot, int kDistance)
+        {
+            if (nullptr == pRoot || kDistance < 0)
+                return 0;
+
+            if (0 == kDistance)
+                return 1;
+
+            return GetCountBelow(pRoot->pLeft, kDistance - 1) + GetCountBelow(pRoot->pRight, kDistance - 1);
+        }
+
+        bool FindNode(Node* pRoot, int oData, vector<Node*>& pPath)
+        {
+            if (nullptr == pRoot)
+                return false;
+
+            if (pRoot->Data == oData)
+            {
+                pPath.push_back(pRoot);
+                return true;
+            }
+            else if (pRoot->Data > oData)
+            {
+                if (FindNode(pRoot->pLeft, oData, pPath)) {
+                    pPath.push_back(pRoot);
+                    return true;
+                }
+            }
+            else
+            {
+                if (FindNode(pRoot->pRight, oData, pPath)) {
+                    pPath.push_back(pRoot);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        int GetCount(Node* pRoot, int oTargetData, int kDistance)
+        {
+            int oCount = 0;
+            vector<Node*> pPath;
+            bool IsFound = FindNode(pRoot, oTargetData, pPath);
+            if (IsFound)
+            {
+                oCount = GetCountBelow(pPath[0], kDistance);
+                for (int iCounter = 1; iCounter < static_cast<int>(pPath.size()); ++iCounter)
+                {
+                    if (kDistance == iCounter) {
+                        ++oCount; break;
+                    }
+                    else {
+                        if (pPath[iCounter]->pLeft == pPath[iCounter - 1llu])
+                            oCount += GetCountBelow(pPath[iCounter]->pRight, kDistance - iCounter - 1llu);
+                        else if(pPath[iCounter]->pRight == pPath[iCounter - 1llu])
+                            oCount += GetCountBelow(pPath[iCounter]->pLeft, kDistance - iCounter - 1llu);
+                    }
+                }
+            }
+
+            return oCount;
+        } 
+    }
+
+    namespace Efficient
+    {
+        int GetCount(Node* pRoot, int oTargetData, int kDistance, int& nCount)
+        {
+            if (nullptr == pRoot)
+                return 0;
+
+            
+            if (pRoot->Data == oTargetData)
+            {
+                nCount += BetterII::GetCountBelow(pRoot, kDistance);
+                return 1;
+            }
+            else
+            {
+                int oCurrentDistance = 0;
+                if (pRoot->Data > oTargetData)
+                {
+                    if (oCurrentDistance = GetCount(pRoot->pLeft, oTargetData, kDistance, nCount))
+                    {
+                        if (oCurrentDistance == kDistance)
+                            ++nCount;
+                        else
+                            nCount += BetterII::GetCountBelow(pRoot->pRight, kDistance - oCurrentDistance - 1);
+
+                        return oCurrentDistance + 1;
+                    }
+                }
+                else
+                {
+                    if (oCurrentDistance = GetCount(pRoot->pRight, oTargetData, kDistance, nCount))
+                    {
+                        if (oCurrentDistance == kDistance)
+                            ++nCount;
+                        else
+                            nCount += BetterII::GetCountBelow(pRoot->pLeft, kDistance - oCurrentDistance - 1);
+
+                        return oCurrentDistance + 1;
+                    }
+                }
+            }
+
+            return 0;
+        }
+    }
+}
+
+
+
+
+
+
 int main()
 {
-    vector<int> oInput{ 40, 30, 32, 35, 80, 90, 100, 120 };
+    vector<int> oInput{ 2, 4, 1, 3, 5 };
+    Node* pBSTRoot = nullptr;
+    for (auto& oData : oInput)
+        pBSTRoot = Insert::InsertIterative(pBSTRoot, oData);
+    int ncount = 0;
+    int oCount = NodesAtDistanceKFromSource::Efficient::GetCount(pBSTRoot, 4, 1, ncount);
+   /* for (auto& oData : oInput)
+        cout << "Data = " << oData << "\t" << "Distance = " << DistanceBetweenTwoNodes::FindDepth(pBSTRoot, oData) << endl;*/
+
+    cout << DistanceBetweenTwoNodes::FindDepth(pBSTRoot, 4) << endl;
+    cout << DistanceBetweenTwoNodes::FindDepth(pBSTRoot, 25) << endl;
+
+    cout << "Distance 33->4 = " << DistanceBetweenTwoNodes::DistanceBetween(pBSTRoot, 33, 4) << endl;
+    cout << "Distance 3->40 = " << DistanceBetweenTwoNodes::DistanceBetween(pBSTRoot, 3, 40) << endl;
+    cout << "Distance 4->36 = " << DistanceBetweenTwoNodes::DistanceBetween(pBSTRoot, 4, 36) << endl;
+
+    cout << "Distance 33->60 = " << DistanceBetweenTwoNodes::DistanceBetween(pBSTRoot, 33, 60) << endl;
+
+    cout << "Distance 50->32 = " << DistanceBetweenTwoNodes::DistanceBetween(pBSTRoot, 50, 32) << endl;
+    cout << "Distance 6->33 = " << DistanceBetweenTwoNodes::DistanceBetween(pBSTRoot, 6, 33) << endl;
+    cout << "Distance 120->6 = " << DistanceBetweenTwoNodes::DistanceBetween(pBSTRoot, 120, 6) << endl;
+
     int oCurrentIdx = 0;
     Node* pNode = PreOrderToBST::CreateBSTFromPreOrderI(oInput, oCurrentIdx, INT_MIN, INT_MAX);
     //PostOrder(pNode);
