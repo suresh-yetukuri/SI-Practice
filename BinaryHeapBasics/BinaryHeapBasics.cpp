@@ -347,10 +347,11 @@ namespace HeapSort
 int main()
 { 
     auto oLambda = [](const pair<int, int>& oFPair, const pair<int, int>& oSPair)->bool {
-        return oFPair.first > oSPair.first;
+        return oFPair.first < oSPair.first;
     };
 
-    priority_queue<pair<int, int>, vector<pair<int, int>>, bool(*)(const pair<int, int>&, const pair<int, int>&)> oPq(oLambda);
+    //priority_queue<pair<int, int>, vector<pair<int, int>>, bool(*)(const pair<int, int>&, const pair<int, int>&)> oPq(oLambda);
+    priority_queue < pair<int, int>, greater<pair<int, int>>> oPq;
     oPq.push(make_pair(1, 2));
     oPq.push(make_pair(3, 2));
     oPq.push(make_pair(5, 2));

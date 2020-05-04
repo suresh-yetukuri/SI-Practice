@@ -1023,16 +1023,149 @@ namespace NodesAtDistanceKFromSource
 }
 
 
+namespace DLLToSBBST
+{
+    /*
+    NLogN, LogN
+    */
+    namespace BruteForce
+    {
+        Node* FindMid(Node* pHead)
+        {
+            Node* pSlow = pHead;
+            Node* pFast = pHead;
 
+            while (nullptr != pFast && nullptr != pFast->pRight)
+            {
+                pSlow = pSlow->pRight;
+                pFast = pFast->pRight->pRight;
+            }
 
+            if (nullptr == pFast && nullptr != pSlow)
+                return pSlow->pLeft;
+            else if (nullptr != pFast && nullptr == pFast->pRight)
+                return pSlow;
+
+            return nullptr;
+        }
+
+        Node* DLLToBST(Node* pHead)
+        {
+            if (nullptr == pHead)
+                return nullptr;
+
+            Node* pRoot = FindMid(pHead); 
+            Node* pLeftSTTail = pRoot->pLeft;
+
+            Node* pRightSTHead = pRoot->pRight; 
+
+            if (nullptr == pLeftSTTail && nullptr == pRightSTHead)
+                return pRoot;
+
+            if (nullptr != pLeftSTTail) { pLeftSTTail->pRight = nullptr; }
+            if (nullptr != pRightSTHead) { pRightSTHead->pLeft = nullptr; }
+
+            pRoot->pLeft = nullptr;
+            pRoot->pRight = nullptr;
+
+            if(pRoot != pHead)
+                pRoot->pLeft = DLLToBST(pHead); 
+            
+            if(pRoot != pRightSTHead)
+                pRoot->pRight = DLLToBST(pRightSTHead);
+
+            return pRoot;
+        }
+    }
+
+    namespace Efficient
+    {
+        int CountNodes(Node* pHead)
+        {
+            if (nullptr == pHead)
+                return 0;
+
+            return 1 + CountNodes(pHead->pRight);
+        }
+
+        Node* ConstructBST(Node*& pHead, int Start, int End)
+        {
+            if (Start > End)
+                return nullptr;
+
+            int Mid = Start + ((End - Start) / 2);
+            Node* pLeftNode = ConstructBST(pHead, Start, Mid - 1);
+            Node* pRoot = pHead;
+            pRoot->pLeft = pLeftNode;
+            pHead = pRoot->pRight;
+            pRoot->pRight = ConstructBST(pHead, Mid + 1, End);
+            return pRoot;
+        }
+
+        Node* DLLToBST(Node* pHead)
+        {
+            int nCount = CountNodes(pHead);
+            return ConstructBST(pHead, 0, nCount - 1);
+        } 
+    }
+}
+
+Node* BinaryTreeToDLL(Node* pRoot)
+{
+    Node* pHead = nullptr;
+
+    if (nullptr != pRoot)
+    {
+        stack<Node*> pStack;
+        Node* pLastProcessed = nullptr;
+        while ((nullptr != pRoot) || (!pStack.empty()))
+        {
+            while (nullptr != pRoot)
+            {
+                pStack.push(pRoot);
+                pRoot = pRoot->pLeft;
+            }
+
+            Node* pCurrent = pStack.top();
+            pStack.pop();
+            if (nullptr != pCurrent->pRight)
+                pRoot = pCurrent->pRight;
+
+            if (nullptr == pHead) {
+                pHead = pLastProcessed = pCurrent;
+                pCurrent->pLeft = nullptr;
+            }
+            else {
+                pLastProcessed->pRight = pCurrent;
+                pCurrent->pLeft = pLastProcessed;
+                pLastProcessed = pCurrent;
+            }
+        }
+
+        pLastProcessed->pRight = nullptr;
+    }
+
+    return pHead;
+}
 
 
 int main()
 {
-    vector<int> oInput{ 2, 4, 1, 3, 5 };
+    vector<Node*> oListInput;
+    auto oComparator = [](const Node* pFNode, const Node* pSNode)->bool {
+        return pFNode->Data > pSNode->Data;
+    };
+    priority_queue<Node*, vector<Node*>, bool(*)(const Node*, const Node*)> oHeap(oListInput.cbegin(), oListInput.cend(), oComparator);
+   
+    vector<int> oInput{ 50, 20, 10, 30, 60, 80, 55, 90 };
     Node* pBSTRoot = nullptr;
     for (auto& oData : oInput)
         pBSTRoot = Insert::InsertIterative(pBSTRoot, oData);
+
+    Node* pHead = BinaryTreeToDLL(pBSTRoot);
+    Node* pNewBST = DLLToSBBST::Efficient::DLLToBST(pHead);
+
+
     int ncount = 0;
     int oCount = NodesAtDistanceKFromSource::Efficient::GetCount(pBSTRoot, 4, 1, ncount);
    /* for (auto& oData : oInput)

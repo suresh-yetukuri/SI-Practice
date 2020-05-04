@@ -58,6 +58,7 @@ namespace UsingDoublyLinkedList
             if (nullptr == pHead)
                 return INT_MIN;
 
+            put(pHead->Data);
             return pHead->Data;
         }
 
@@ -111,7 +112,7 @@ namespace UsingDoublyLinkedList
         }
 
         void print()
-        {
+        { 
             if (nullptr == pHead)
                 cout << "Cache Is Empty" << endl;
 

@@ -10,14 +10,14 @@ class Node
 {
 public:
     int Data;
-    int Height;
+    int Height; 
     int BalanceFactor;
     Node* pLeft;
     Node* pRight;
     Node(int val)
     {
         this->Data = val;
-        this->Height = 1;
+        this->Height = 1; 
         this->BalanceFactor = 0;
         this->pLeft = nullptr;
         this->pRight = nullptr;
