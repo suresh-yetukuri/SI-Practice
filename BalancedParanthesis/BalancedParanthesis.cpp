@@ -5,6 +5,7 @@
 #include <string>
 #include <stack>
 #include <algorithm>
+#include <unordered_map>
 using namespace std;
 
 bool IsBalanced(string& oInput)
@@ -41,12 +42,72 @@ bool IsBalanced(string& oInput)
     return pStack.empty();
 }
 
+unordered_map <char, int> oHashMap;
+bool IsInitialized = false;
+
+int ApplyOperator(int a, int b, char ch)
+{
+    switch (ch)
+    {
+    case '+':
+        return a + b;
+    case '-':
+        return a - b;
+    case '*':
+        return a * b;
+    case '/':
+        return a / b;
+    default:
+        return 0;
+    }
+
+    return 0;
+}
+
+bool IsOperator(char ch)
+{
+    switch (ch)
+    {
+    case '+':
+        return true;
+    case '-':
+        return true;
+    case '*':
+        return true;
+    case '/':
+        return true;
+    default:
+        return false;
+    }
+
+    return false;
+}
+
+// The main function that returns value of a given postfix expression
+int evaluatePostfix(string& str)
+{
+    stack<int> pStack;
+    for (auto ch : str)
+    {
+        if (IsOperator(ch)) {
+            int op2 = pStack.top(); pStack.pop();
+            int op1 = pStack.top(); pStack.pop();
+            pStack.push(ApplyOperator(op1, op2, ch));
+        }
+        else
+            pStack.push(atoi(&ch));
+    }
+
+    return pStack.top();
+}
 
 
 int main()
 {
-    string oInput{ "(())}[{}]" };
-    cout << IsBalanced(oInput);
+    char c = '2';
+    int a = atoi(&c);
+    string oInput{ "231*+9-" };
+    cout << evaluatePostfix(oInput);
     return 0;
 }
 

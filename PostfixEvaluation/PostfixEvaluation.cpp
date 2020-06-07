@@ -74,6 +74,7 @@ int EvaluatePostfix(vector<string>& oPostfix)
 
 int main()
 {
+    
     vector<string> oInput{ "-+"};
     int oResult = EvaluatePostfix(oInput);
     return 0;

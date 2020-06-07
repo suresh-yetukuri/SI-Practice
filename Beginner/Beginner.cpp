@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <unordered_map>
 using namespace std;
 
 class Node
@@ -318,6 +319,53 @@ Node* SwapInPairs(Node* pNode)
     return pPairHeadNode;
 }
 
+
+Node* SwapNode(Node* pFirst, Node* pSecond)
+{
+    pSecond->pNext = pFirst;
+    pFirst->pNext = nullptr;
+    return pSecond;
+}
+
+Node* pairWiseSwap(Node* pHead) {
+    if (nullptr == pHead ||
+        nullptr == pHead->pNext)
+        return pHead;
+
+    Node* pCurrent = pHead;
+    Node* pPrev = nullptr;
+    Node* pFirst = nullptr;
+    Node* pSec = nullptr;
+
+    while ((nullptr != pCurrent) || (nullptr != pFirst && nullptr != pSec))
+    {
+        if (nullptr != pFirst && nullptr != pSec)
+        {
+            Node* pNode = SwapNode(pFirst, pSec);
+            if (nullptr != pPrev)
+                pPrev->pNext = pNode;
+            else
+                pHead = pNode;
+
+            pPrev = pFirst;
+            pFirst = pSec = nullptr;
+        }
+
+        if (nullptr == pFirst)
+            pFirst = pCurrent;
+        else
+            pSec = pCurrent;
+
+        if (nullptr != pCurrent)
+            pCurrent = pCurrent->pNext;
+    }
+
+    if (nullptr != pFirst)
+        pPrev->pNext = pFirst;
+
+    return pHead;
+}
+
 /*
 Find Mid of the Linked List
 */
@@ -371,6 +419,37 @@ bool IsPalindrome(Node* pHead)
     return IsPalindrome;
 }
 
+
+bool isPalindrome(Node* pHead)
+{
+    if (nullptr == pHead
+        || nullptr == pHead->pNext)
+        return pHead;
+
+    unordered_map<Node*, Node*> oHashMap;
+    Node* pCurrent = pHead;
+    Node* pPrev = nullptr;
+    while (nullptr != pCurrent)
+    {
+        oHashMap[pCurrent] = pPrev;
+        pPrev = pCurrent;
+        pCurrent = pCurrent->pNext;
+    }
+
+    Node* pForward = pHead;
+    Node* pBackward = pPrev;
+
+    while (pForward != pBackward)
+    {
+        if (pForward->Data != pBackward->Data)
+            return false;
+
+        pForward = pForward->pNext;
+        pBackward = oHashMap[pBackward];
+    }
+
+    return true;
+}
 /*
 Merge two sorted linked list
 */
@@ -934,17 +1013,129 @@ namespace AddList
 
 }
 
+Node* NthFromLast(Node* pHead, int& n)
+{
+    if (nullptr == pHead)
+    {
+        --n;
+        return nullptr;
+    }
+
+    auto oResult = NthFromLast(pHead->pNext, n);
+    if (nullptr != oResult)
+        return oResult;
+    else if ((n--) == 0)
+        return pHead;
+
+    return nullptr;
+}
+
+/* Should return data of n'th node from the end of linked list.
+*  head: head of the linked list
+*  n: nth node from end to find
+*/
+int getNthFromLast(Node* head, int n)
+{
+    auto oResult = NthFromLast(head, n);
+    if (nullptr != oResult)
+        return oResult->Data;
+
+    return -1;
+}
+
+/* Should return data of n'th node from the end of linked list.
+*  head: head of the linked list
+*  n: nth node from end to find
+*/
+//int getNthFromLast(Node* head, int n)
+//{
+//    auto oResult = NthFromLast(head, n);
+//    if (nullptr != oResult)
+//        return oResult->Data;
+//
+//    return -1;
+//}
+
+Node* Update(pair<Node*, Node*>& oTargetPair, Node* pCurrent)
+{
+    auto pNext = pCurrent->pNext;
+    if (nullptr == oTargetPair.first)
+        oTargetPair.first = oTargetPair.second = pCurrent;
+    else
+    {
+        oTargetPair.second->pNext = pCurrent;
+        oTargetPair.second = oTargetPair.second->pNext;
+    }
+
+    oTargetPair.second->pNext = nullptr;
+    pCurrent = pNext;
+    return pCurrent;
+}
+
+Node* segregate(Node* pHead) {
+    if (nullptr == pHead
+        || nullptr == pHead->pNext)
+        return pHead;
+
+    pair<Node*, Node*> oFrontPair;
+    pair<Node*, Node*> oMiddlePair;
+    pair<Node*, Node*> oBackPair;
+
+    Node* pCurrent = pHead;
+    while (nullptr != pCurrent)
+    {  
+        if (pCurrent->Data == 0)
+            pCurrent = Update(oFrontPair, pCurrent);
+        else if (pCurrent->Data == 1)
+            pCurrent = Update(oMiddlePair, pCurrent);
+        else
+            pCurrent = Update(oBackPair, pCurrent);
+    }
+
+    pHead = new Node(-1);
+    pCurrent = pHead;
+    if (nullptr != oFrontPair.first) {
+        pCurrent->pNext = oFrontPair.first;
+        pCurrent = oFrontPair.second;
+    }
+
+    if (nullptr != oMiddlePair.first) {
+        pCurrent->pNext = oMiddlePair.first;
+        pCurrent = oMiddlePair.second;
+    }
+
+    if (nullptr != oBackPair.first) {
+        pCurrent->pNext = oBackPair.first;
+        pCurrent = oBackPair.second;
+    }
+
+    auto pNodeTBD = pHead;
+    pHead = pHead->pNext;
+    delete(pNodeTBD); pNodeTBD = nullptr;
+    return pHead;
+}
+
 int main()
 {
-    vector<int> oLeft{ 1,1,1,1,1, 2, 2 , 3, 4 , 6, 8, 10,10 ,12, 15, 18 , 18 };
+    unordered_map<Node*, Node*> oHash;
+    oHash[nullptr] = nullptr;
+    oHash.clear();
+    vector<int> oLeft{ 1, 2, 2, 1, 2, 0, 2, 2 };
     vector<int> oRight{ 1};
     Node* pLeft = CreateLinkedList(oLeft, 0);
+    auto oSort = segregate(pLeft);
+    PrintLinkedList(oSort);
+
+
+    int nth = 2;
+    //auto oREsult = getNthFromLast(pLeft, nth);
+    Node* oSwap = pairWiseSwap(pLeft);
     Node* pRight = CreateLinkedList(oRight, 0);
-    PrintLinkedList(pLeft);
+    PrintLinkedList(oSwap);
     cout << endl;
     pLeft = DistinctIterative(pLeft);
     PrintLinkedList(pLeft);
-    Node* pResult = AddList::AddList(pLeft, pRight);
+   Node* pResult = AddList::AddList(pLeft, pRight);
     cout << endl;
     PrintLinkedList(pResult);
     pLeft = ReverseInGroup::Iterative::ReverseInGroup(pLeft, 4);

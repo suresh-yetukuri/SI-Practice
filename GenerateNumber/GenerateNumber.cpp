@@ -54,6 +54,7 @@ namespace BruteForce
 
 int main()
 {
+    
     Optimized::GenerateNumber({ "5", "6" }, 10);
     cout << endl;
     Optimized::GenerateNumber({ "5", "6", "7" }, 10);

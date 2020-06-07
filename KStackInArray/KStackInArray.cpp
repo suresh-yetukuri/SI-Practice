@@ -69,10 +69,11 @@ public:
         return (oTop[oStackIdx] == -1);
     }
          
-    int Size(int oStackIdx)
-    {
-        return oTop[oStackIdx] + 1;
-    }
+    //int Size(int oStackIdx)
+    //{
+    //    // this is wrong
+    //    return oTop[oStackIdx] + 1;
+    //}
 
 private:
     int nCapacity;

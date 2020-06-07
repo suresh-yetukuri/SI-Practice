@@ -112,6 +112,9 @@ private:
 
     void heapify(int oCurrentIdx)
     { 
+        if (oCurrentIdx >= nSize)
+            return;
+
         int oLeftIdx = left(oCurrentIdx);
         int oRightIdx = right(oCurrentIdx);
         int oSmallestIdx = oCurrentIdx;

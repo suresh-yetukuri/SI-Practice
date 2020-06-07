@@ -56,6 +56,7 @@ namespace UsingStack
             pStack.push(iCounter);
         }
 
+
         return move(oSpan);
     }
 }

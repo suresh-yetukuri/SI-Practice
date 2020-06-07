@@ -74,6 +74,8 @@ public:
             return 0;
         else if (IsFull())
             return Capacity;
+        else if (oFront <= oRear)
+            return (oRear - oFront) + 1;
         else
             return (((Capacity - oFront) + oRear) + 1) % Capacity;
     }
@@ -89,7 +91,7 @@ public:
     bool IsFull()
     {
         return ((oRear + 1) % Capacity) == oFront;
-    }
+    } 
 
 private:
     int Capacity;

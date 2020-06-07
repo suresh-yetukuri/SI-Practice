@@ -7,6 +7,7 @@
 #include <stack>
 #include <queue>
 #include <unordered_map>
+#include <unordered_set>
 #include <math.h>
 using namespace std;
 
@@ -70,6 +71,75 @@ int GetSize(Node* pRoot)
         return 0;
 
     return 1 + GetSize(pRoot->pLeft) + GetSize(pRoot->pRight);
+}
+
+int GetDepth(Node* pRoot, int oData)
+{
+    if (nullptr == pRoot)
+        return -1;
+    
+    if (oData == pRoot->Data)
+        return 0;
+
+    int LR = GetDepth(pRoot->pLeft, oData);
+    if (LR >= 0)
+        return LR + 1;
+
+    int RR = GetDepth(pRoot->pRight, oData);
+    if (RR >= 0)
+        return RR + 1;
+
+    return -1;
+}
+
+/*
+No of nodes in the shortest path from root node to the nearest leaft node
+*/
+int MinDepthOfTree(Node* pRoot) {
+    if (nullptr == pRoot)
+        return 0;
+
+    int oCurrentDepth = 1;
+    queue<Node*> pQueue;
+    pQueue.push(pRoot);
+    while (!pQueue.empty())
+    {
+        int nSize = pQueue.size();
+        for (int iCounter = 0; iCounter < nSize; ++iCounter)
+        {
+            Node* pCurrent = pQueue.front();
+            pQueue.pop();
+            if (nullptr == pCurrent->pLeft && nullptr == pCurrent->pRight)
+                return oCurrentDepth;
+
+            if (nullptr != pCurrent->pLeft)
+                pQueue.push(pCurrent->pLeft);
+
+            if (nullptr != pCurrent->pRight)
+                pQueue.push(pCurrent->pRight);
+        }
+
+        ++oCurrentDepth;
+    }
+
+    return oCurrentDepth;
+}
+
+int MinDepthOfTreeRec(Node* pRoot)
+{
+    if (nullptr == pRoot)
+        return 0;
+
+    if (nullptr == pRoot->pLeft && nullptr == pRoot->pRight)
+        return 1;
+
+    if (nullptr == pRoot->pLeft)
+        return 1 + MinDepthOfTreeRec(pRoot->pRight);
+
+    if (nullptr == pRoot->pRight)
+        return 1 + MinDepthOfTreeRec(pRoot->pLeft);
+
+    return 1 + min(MinDepthOfTreeRec(pRoot->pLeft), MinDepthOfTreeRec(pRoot->pRight));
 }
 
 namespace Traversals
@@ -319,6 +389,34 @@ namespace Traversals
                     cout << pFinalStack.top() << " ";
                     pFinalStack.pop();
                 }
+            }
+        }
+
+        void DiagonalOrder(Node* pRoot)
+        {
+            if (nullptr == pRoot)
+                return;
+
+            queue<Node*> pQueue;
+            pQueue.push(pRoot);
+            while (!pQueue.empty())
+            {
+                int nSize = pQueue.size();
+                for (int iCounter = 0; iCounter < nSize; ++iCounter)
+                {
+                    Node* pCurrent = pQueue.front();
+                    pQueue.pop();
+                    while (nullptr != pCurrent)
+                    {
+                        cout << pCurrent->Data << " ";
+                        if (nullptr != pCurrent->pRight)
+                            pQueue.push(pCurrent->pRight);
+
+                        pCurrent = pCurrent->pLeft;
+                    }
+                }
+
+                cout << endl;
             }
         }
     }
@@ -584,7 +682,7 @@ namespace Problems
 
     /*
     Difference between height of left subtree and right subtree should not
-    be more than 1. And it should be tree for all node, then we can say that
+    be more than 1. And it should be true for all node, then we can say that
     it is a height balanced tree
     */
     namespace HeightBalancedTree
@@ -738,6 +836,53 @@ namespace Problems
 
             Recursive(pRoot->pRight, pLastProcessed);
             return pHead;
+        }
+
+        Node* PreOrder(Node* pRoot, Node*& pLastProcessed)
+        {
+            if (nullptr == pRoot)
+                return nullptr;
+
+            Node* pLeft = pRoot->pLeft;
+            Node* pRight = pRoot->pRight;
+            Node* pHead = nullptr;
+            if (nullptr == pLastProcessed)
+            {
+                pHead = pRoot;
+                pRoot->pLeft = nullptr;
+            }
+            else {
+                pLastProcessed->pRight = pRoot;
+                pRoot->pLeft = pLastProcessed;
+            }
+
+            pRoot->pRight = nullptr;
+            pLastProcessed = pRoot;
+            PreOrder(pLeft, pLastProcessed);
+            PreOrder(pRight, pLastProcessed);
+            return pHead;
+        }
+
+        void PostOrder(Node* pRoot, Node*& pLastProcessed, Node* &pHead)
+        {
+            if (nullptr == pRoot)
+                return;
+             
+            PostOrder(pRoot->pLeft, pLastProcessed, pHead);
+            PostOrder(pRoot->pRight, pLastProcessed, pHead);
+            if (nullptr == pLastProcessed)
+            {
+                pHead = pRoot;
+                pRoot->pLeft = nullptr;
+            }
+            else {
+                pLastProcessed->pRight = pRoot;
+                pRoot->pLeft = pLastProcessed; 
+            }
+            
+            pRoot->pRight = nullptr;
+            pLastProcessed = pRoot;
+            return;
         }
     }
 
@@ -1129,6 +1274,42 @@ namespace Problems
             && IsCBT(pRoot->pRight, (2 * oCurrentIdx) + 2, nCount);
     }
 
+    bool IsCBTTree(Node* pRoot)
+    {
+        if (nullptr == pRoot)
+            return true;
+
+        queue<Node*> pQueue;
+        bool IsHandicapNode = false;
+        pQueue.push(pRoot);
+        while (!pQueue.empty())
+        {
+            Node* pCurrent = pQueue.front();
+            pQueue.pop();
+            if (nullptr != pCurrent->pLeft)
+            {
+                if (IsHandicapNode)
+                    return false;
+
+                pQueue.push(pCurrent->pLeft);
+            }
+            else
+                IsHandicapNode = true;
+
+            if (nullptr != pCurrent->pRight)
+            {
+                if (IsHandicapNode)
+                    return false;
+
+                pQueue.push(pCurrent->pRight);
+            }
+            else
+                IsHandicapNode = true;
+        }
+
+        return true;
+    }
+
     namespace ConnectNodesAtSameLevel
     {
         class Node
@@ -1178,6 +1359,96 @@ namespace Problems
             }
         }
     }
+
+    namespace BuildTreeFromInorderAndLevelOrderTraversal
+    {
+        Node* ConstructTree(vector<int>& pInorder, vector<int> pLevelOrder, int Low, int High)
+        {
+            if (Low > High)
+                return nullptr;
+
+            Node* pRoot = new Node(pLevelOrder[0]);
+            int oSearchIdx = -1;
+            for (int iCounter = Low; iCounter <= High; ++iCounter)
+            {
+                if (pLevelOrder[0] == pInorder[iCounter])
+                {
+                    oSearchIdx = iCounter;
+                    break;
+                }
+            }
+            
+            unordered_set<int> oLeftSubtree;
+            for (int iCounter = Low; iCounter < oSearchIdx; ++iCounter)
+                oLeftSubtree.insert(pInorder[iCounter]);
+
+            // Now we are going to build level order for left subtree and right subtree
+            vector<int> pLeftLevelOrder(oLeftSubtree.size());
+            vector<int> pRightLevelOrder((High - Low) - oLeftSubtree.size());
+            int pLeftCounter = 0;
+            int pRightCounter = 0;
+            for (int iCounter = 1; iCounter < (High - Low + 1); ++iCounter)
+            {
+                if (oLeftSubtree.find(pLevelOrder[iCounter]) != oLeftSubtree.end())
+                    pLeftLevelOrder[pLeftCounter++] = pLevelOrder[iCounter];
+                else
+                    pRightLevelOrder[pRightCounter++] = pLevelOrder[iCounter];
+            }
+
+            pRoot->pLeft = ConstructTree(pInorder, move(pLeftLevelOrder), Low, oSearchIdx - 1);
+            pRoot->pRight = ConstructTree(pInorder, move(pRightLevelOrder), oSearchIdx + 1, High);
+             
+            return pRoot;
+        }
+    }
+
+    namespace CheckIfMirror
+    {
+        bool IsMirrorRecursive(Node* pLeft, Node* pRight)
+        {
+            if (nullptr == pLeft && nullptr == pRight)
+                return true;
+
+            if (nullptr == pLeft || nullptr == pRight)
+                return false;
+
+            return (pLeft->Data == pRight->Data)
+                && IsMirrorRecursive(pLeft->pLeft, pRight->pRight)
+                && IsMirrorRecursive(pLeft->pRight, pRight->pLeft);
+        }
+
+        bool IsMirrorIterative(Node* pLeft, Node* pRight)
+        {
+            if (nullptr == pLeft && nullptr == pRight)
+                return true;
+
+            if (nullptr == pLeft || nullptr == pRight)
+                return false;
+
+            stack<Node*> pLeftStack; pLeftStack.push(pLeft);
+            stack<Node*> pRightStack; pRightStack.push(pRight);
+             
+            while (!pLeftStack.empty() && !pRightStack.empty())
+            {
+                Node* pLeftNode = pLeftStack.top(); pLeftStack.pop();
+                Node* pRightNode = pRightStack.top(); pRightStack.pop();
+
+                if (nullptr == pLeftNode && nullptr == pRightNode)
+                    continue;
+
+                if (nullptr == pLeftNode || nullptr == pRightNode)
+                    return false;
+
+                if (pLeftNode->Data != pRightNode->Data)
+                    return false;
+
+                pLeftStack.push(pLeftNode->pRight); pLeftStack.push(pLeftNode->pLeft);
+                pRightStack.push(pRightNode->pLeft); pRightStack.push(pRightNode->pRight);
+            }
+
+            return pLeftStack.empty() && pRightStack.empty();
+        }
+    }
 }
 
 
@@ -1185,12 +1456,37 @@ namespace Problems
 
 int main()
 {
-    deque<int> oDeque;
+    vector<int> adj[8];
+   /* deque<int> oDeque;
     oDeque.push_front(1);
     oDeque.push_front(2);
-    oDeque.push_back(3);
+    oDeque.push_back(3);*/
     vector<int> oInput{ 50, 20, 10, 30, 60, 80,55, 90 };
     Node* pRoot = BuildTree(oInput);
+    Traversals::DepthFirst::Postorder(pRoot);
+    cout << endl;
+    Node* pLast = nullptr;
+    Node* pHad = nullptr;
+    Problems::BinaryTreeToDLL::PostOrder(pRoot, pLast, pHad);
+    Node* pCurrent = pHad;
+    while (nullptr != pCurrent)
+    {
+        pLast = pCurrent;
+        cout << pCurrent->Data << " ";
+        pCurrent = pCurrent->pRight;
+    }
+    cout << endl;
+    pCurrent = pLast;
+    while (nullptr != pCurrent)
+    {
+        cout << pCurrent->Data << " ";
+        pCurrent = pCurrent->pLeft;
+    }
+    
+
+
+
+
     Traversals::DepthFirst::Inorder(pRoot);
     cout << endl;
     //Serialize
