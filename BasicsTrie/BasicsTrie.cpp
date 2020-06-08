@@ -11,10 +11,14 @@ class TrieNode
 {
 public:
     vector<TrieNode*> pChild;
+    int nCount;
+    int nValue;
     bool IsEnd;
     TrieNode()
     {
         IsEnd = false;
+        nCount = 0;
+        nValue = INT_MIN;
         pChild.resize(26, nullptr);
     }
 };
@@ -29,7 +33,7 @@ bool IsEmpty(TrieNode* pNode)
 /*
 N, 1 (Worst Case)
 */
-void Insert(TrieNode* pRoot, string&& oInput)
+void Insert(TrieNode* pRoot, string&& oInput, int Value)
 {
     TrieNode* pCurrent = pRoot;
     for (auto& ch : oInput)
@@ -39,8 +43,10 @@ void Insert(TrieNode* pRoot, string&& oInput)
             pCurrent->pChild[charIdx] = new TrieNode();
 
         pCurrent = pCurrent->pChild[charIdx];
+        pCurrent->nCount = pCurrent->nCount + 1;
     }
 
+    pCurrent->nValue = Value;
     pCurrent->IsEnd = true;
 }
 
@@ -92,19 +98,140 @@ bool Search(TrieNode* pRoot, string&& oInput)
     return pCurrent->IsEnd;
 }
 
+int Search(TrieNode* pRoot, string oInput)
+{
+    TrieNode* pCurrent = pRoot;
+    for (auto& ch : oInput)
+    {
+        int charIdx = ch - 'a';
+        if (nullptr == pCurrent->pChild[charIdx])
+            return INT_MIN;
+
+        pCurrent = pCurrent->pChild[charIdx];
+    }
+
+    if (pCurrent->IsEnd)
+        return pCurrent->nValue;
+
+    return INT_MIN;
+}
+
+void PrintLexographicalOrder(TrieNode* pRoot, string& oPrefix)
+{
+    if (pRoot->IsEnd)
+        cout << oPrefix << endl;
+
+    for (int iCounter = 0; iCounter < 26; ++iCounter)
+    {
+        if (nullptr != pRoot->pChild[iCounter]) {
+            oPrefix.push_back('a' + iCounter);
+            PrintLexographicalOrder(pRoot->pChild[iCounter], oPrefix);
+            oPrefix.pop_back();
+        }
+    }
+}
+
+void PrefixSearch(TrieNode* pRoot, string& oInput)
+{
+    TrieNode* pCurrent = pRoot;
+    for (auto& ch : oInput)
+    {
+        int oCharIdx = ch - 'a';
+        if (nullptr == pCurrent->pChild[oCharIdx])
+            return;
+
+        pCurrent = pCurrent->pChild[oCharIdx];
+    }
+
+    PrintLexographicalOrder(pCurrent, oInput);
+}
+
+int PrefixSearchCount(TrieNode* pRoot, string& oInput)
+{
+    TrieNode* pCurrent = pRoot;
+    for (auto& ch : oInput)
+    {
+        int oCharIdx = ch - 'a';
+        if (nullptr == pCurrent->pChild[oCharIdx])
+            return 0;
+
+        pCurrent = pCurrent->pChild[oCharIdx];
+    }
+
+    return pCurrent->nCount;
+}
+
+string LongestCommonPrefix(TrieNode* pRoot)
+{
+    TrieNode* pCurrent = pRoot;
+    int oSingleChildIdx = -1;
+    string oLCP{};
+
+    auto IsSingleChild = [&oSingleChildIdx](TrieNode* pNode)->bool {
+        int oCount = 0; 
+        oSingleChildIdx = -1;
+        for (int iCounter = 0; iCounter < 26; ++iCounter) {
+            if (nullptr != pNode->pChild[iCounter]) {
+                ++oCount;
+                if (oCount == 1)
+                    oSingleChildIdx = iCounter;
+                else {
+                    oSingleChildIdx = -1;
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    };
+
+    while (!pCurrent->IsEnd && IsSingleChild(pCurrent))
+    {
+        oLCP.push_back('a' + oSingleChildIdx);
+        pCurrent = pCurrent->pChild[oSingleChildIdx];
+    }
+
+    return oLCP;
+}
+
 
 int main()
 {
-    string oResult;
-    oResult.push_back(1 + 48);
+    //string oResult;
+    //oResult.push_back(1 + 48);
     TrieNode* pRoot = new TrieNode();
-    Insert(pRoot, "bad");
-    Insert(pRoot, "bat");
-    Insert(pRoot, "geek");
-    Insert(pRoot, "geeks");
-    Insert(pRoot, "cat");
-    Insert(pRoot, "badass");
-    Insert(pRoot, string{ "zoo" });
+    Insert(pRoot, "bad", 23);
+    Insert(pRoot, "badass", 54);
+    Insert(pRoot, "baddy", 89);
+    Insert(pRoot, "badam", 78);
+    Insert(pRoot, "qadden", 56);
+   /* Insert(pRoot, "badass");
+    Insert(pRoot, "aunty");
+    Insert(pRoot, "suresh");
+    Insert(pRoot, "rekha");
+    Insert(pRoot, "can");
+    Insert(pRoot, "ba");
+    Insert(pRoot, "a");
+    Insert(pRoot, "aa");
+    Insert(pRoot, string{ "zoo" });*/
+    cout << LongestCommonPrefix(pRoot) << endl;
+    string oSearchInput{ "cat" };
+    cout << Search(pRoot, oSearchInput) << endl;
+    oSearchInput = "geeks";
+    cout << Search(pRoot, oSearchInput) << endl;
+    oSearchInput = "bat";
+    cout << Search(pRoot, oSearchInput) << endl;
+    oSearchInput = "ca";
+    cout << Search(pRoot, oSearchInput) << endl;
+
+
+
+    string oPrefix{"ba"};
+    PrefixSearch(pRoot, oPrefix);
+    // PrintLexographicalOrder(pRoot, oPrefix);
+    cout << endl;
+
+    cout << PrefixSearchCount(pRoot, oPrefix);
 
     string s{ "bad" };
     pRoot = Delete(pRoot, s, 0);
